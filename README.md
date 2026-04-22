@@ -1,4 +1,4 @@
-# 🛡️ Pokemon Team Builder (FireRed/LeafGreen)
+# Pokemon Pokopia Planner
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://nishimotord.github.io/pokopia-planner/)
 
 > A lightweight planner designed for Pokemon Pokopia, developed with Claude. Made for fun with a focus on assigning pokemon to sepciefic habitats quickly
