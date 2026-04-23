@@ -481,6 +481,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemePicker();
   const saved = localStorage.getItem('pokopia-theme');
   if(saved) setTheme(saved);
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    const value = localStorage.getItem(key);
+    if (key !== 'pokopia-theme'){
+      pokemonLocation[key] = value;
+  }
+  renderPokemon();
+}
 });
 document.addEventListener('click', e => {
   const wrap = document.getElementById('theme-picker-wrap');
@@ -766,6 +774,7 @@ function openHabFromPkModal(enc) {
 
 function assignToArea(uid,areaKey) {
   pokemonLocation[uid]=areaKey;
+  localStorage.setItem(uid,areaKey)
   openPkModal(uid);
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
@@ -773,6 +782,7 @@ function assignToArea(uid,areaKey) {
 
 function releaseToWild(uid) {
   delete pokemonLocation[uid];
+  localStorage.removeItem(uid); 
   openPkModal(uid);
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
@@ -840,7 +850,16 @@ function initFilters() {
 }
 
 initFilters();
-renderPokemon();
+window.onload = function() {
+    // 1. Disable the browser's default scroll restoration behavior
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
+    // 2. Scroll to the absolute top of the page
+    window.scrollTo(0, 0);
+};
+
 </script>
 </body>
 </html>
