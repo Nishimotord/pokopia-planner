@@ -71,7 +71,7 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 /* ── HABITAT CARD ── */
 .hab-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px;cursor:pointer;transition:transform 0.12s;overflow:hidden}
 .hab-card:hover{transform:translateY(-2px)}
-.hab-img{width:100%;height:72px;object-fit:cover;border-radius:6px;margin-bottom:5px;display:block}
+.hab-img{width:100%;height:fit-content;object-fit:cover;border-radius:6px;margin-bottom:5px;display:block}
 .hab-id{font-size:0.62rem;opacity:0.45;font-family:monospace;text-align:center}
 .hab-name{font-size:0.8rem;font-weight:700;text-align:center;margin:4px 0;line-height:1.3}
 .hab-pokemon{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:7px}
@@ -139,7 +139,7 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 @media(max-width:480px){:root{--card-min:150px}.controls-bar input[type=text]{width:130px}}
 
 /* ── THEMES ── */
-/* dark (default — already in :root) */
+/* normal (default — already in :root) */
 body.theme-light{--bg:#f0f4f8;--surface:#ffffff;--surface2:#eef1f5;--text:#1a1a2e;--text-dim:#6b7280;--border:#d1d5db;--accent2:#e67e22}
 /* cool: soft blue-grey mid-tone — easy on eyes, readable */
 
@@ -210,11 +210,13 @@ body.theme-steel    { --bg:#1a1c1e; --surface:#b8b8d0; --surface2:#8a8aa0; --tex
     </div>
     <div class="ctrl-divider"></div>
     <div class="ctrl-group" id="spec-filters"><span class="ctrl-label">Specialty:</span></div>
-    <div class="ctrl-divider"></div>
-    <div class="ctrl-group" id="time-filters"><span class="ctrl-label">Time:</span></div>
-    <div class="ctrl-divider"></div>
-    <div class="ctrl-group" id="weather-filters"><span class="ctrl-label">Weather:</span></div>
-    <div class="ctrl-divider"></div>
+     <!-- DISABLED: Time and Weather Filters
+      <div class="ctrl-divider"></div>
+      <div class="ctrl-group" id="time-filters"><span class="ctrl-label">Time:</span></div>
+      <div class="ctrl-divider"></div>
+      <div class="ctrl-group" id="weather-filters"><span class="ctrl-label">Weather:</span></div>
+      <div class="ctrl-divider"></div>
+    -->
     <button class="qa-toggle" onclick="toggleQuickAdd()" id="qa-toggle-btn">⚡ Quick Add</button>
   </div>
 
@@ -300,17 +302,23 @@ const AREAS = [
 ];
 
 // Pokopia-unique forms (show a special badge)
-const POKOPIA_UNIQUE = new Set(['Peakychu','Mosslax','Professor Tangrowth','Smearguru']);
+const POKOPIA_UNIQUE = new Set(['Peakychu','Mosslax','Professor Tangrowth','Smearguru (Smeargle)','Chef Dente (Greedent)','Tinkmaster (Tinkaton)']);
 const UNIQUE_FORMS = [
   {name: 'Peakychu', urlStr: '-peakychu'},
   {name: 'Mosslax', urlStr: '-mosslax'},
   {name: 'Professor Tangrowth',urlStr: '-professortangrowth'},
-  {name: 'Smearguru',urlStr: '-smearguru'},
+  {name: 'Smearguru (Smeargle)',urlStr: '-smearguru'},
   {name: 'Toxtricity Amped Form',urlStr: '-toxtricityampedform'},
-  {name: 'Tinkaton',urlStr: '-tinkmeister'},
+  {name: 'Toxtricity Low Key Form',urlStr: '-toxtricitylowkeyform'},
+  {name: 'Tinkmaster (Tinkaton)',urlStr: '-tinkmeister'},
   {name: 'Shellos East Sea',urlStr: '-shelloseastsea'},
   {name: 'Gastrodon East Sea',urlStr: '-gastrodoneastsea'},
-  {name: 'Paldean Wooper',urlStr: '-p'}
+  {name: 'Paldean Wooper',urlStr: '-p'},
+  {name: 'Tatsugiri Curly Form',urlStr: '-tatsugiricurlyform'},
+  {name: 'Tatsugiri Droopy Form',urlStr: '-tatsugiridroopyform'},
+  {name: 'Tatsugiri Stretchy Form',urlStr: '-tatsugiristretchyform'},
+  {name: 'Chef Dente (Greedent)',urlStr: '-cook'}
+  
 ];
 // ALL_POKEMON loaded from pokopia-data.js (see <script src="pokopia-data.js">)
 
@@ -355,13 +363,6 @@ function spriteUrl(p) {
     // pokeapi default
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${idNum}.png`;
   }
-}
-
-function rarityStars(r) {
-  if(r==='Very Rare') return '⭐⭐⭐';
-  if(r==='Rare') return '⭐⭐';
-  if(r) return '⭐';
-  return '';
 }
 
 function timeIcons(t) {
@@ -566,7 +567,6 @@ function pkCardHTML(p, clickable=true) {
     <div class="pk-name">${p.name}</div>
     <div class="pk-types">${typeBadges}</div>
     <div class="pk-specs">${specs}</div>
-    <div class="pk-rarity">${rarityHTML(p.rarity)}</div>
     <div class="pk-tw"><span>${timeIcons(p.time)}</span><span>${weatherIcons(p.weather)}</span></div>
   </div>`;
 }
@@ -577,7 +577,8 @@ function renderPokemon() {
   let data = ALL_POKEMON.filter(p=>{
     if(q && !p.name.toLowerCase().includes(q)) return false;
     if(activeSpecFilters.length && !activeSpecFilters.some(s=>p.specialties.includes(s))) return false;
-    if(activeTimeFilters.length) {
+   /* DISABLED: Time and Weather Filters
+      if(activeTimeFilters.length) {
       // Exclusive: pokemon must appear ONLY in the selected times (exact subset match)
       const pt=(p.time||'').split(',').map(x=>x.trim()).filter(Boolean);
       // pt must be a subset of activeTimeFilters — every pt entry must be selected
@@ -587,7 +588,7 @@ function renderPokemon() {
       // Exclusive: pokemon must appear ONLY in the selected weather
       const pw=(p.weather||'').split(',').map(x=>x.trim()).filter(Boolean);
       if(!pw.length || !pw.every(w=>activeWeatherFilters.includes(w))) return false;
-    }
+    }*/
     return true;
   });
   if(activeSort==='id') data.sort((a,b)=>a.pokopiaId-b.pokopiaId||a.name.localeCompare(b.name));
@@ -645,7 +646,7 @@ function renderHabitats() {
     const sprites=h.pokemon.slice(0,8).map(p=>`<img src="${spriteUrl(p)}" alt="${p.name}" title="${p.name}" loading="lazy">`).join('');
     const more=h.pokemon.length>8?`<span style="font-size:0.65rem;opacity:0.55">+${h.pokemon.length-8}</span>`:'';
     const idLabel = h.habitatId ? `<div class="hab-id">#${h.habitatId}</div>` : '';
-    return `<div class="hab-card" onclick="openHabModal('${encodeURIComponent(h.name)}')">
+    return `<div class="hab-card" onclick="openHabModal('${(h.name.replace(/'/g, "\\'"))}')">
       ${idLabel}
       ${imgHtml}
       <div class="hab-name">${h.name}</div>
@@ -690,7 +691,7 @@ function openPkModal(uid) {
   const habCards=p.habitats.map(h=>{
     const hSpr = habitatSpriteUrl(h.habitatId);
     const hImg = hSpr ? `<img src="${hSpr}" alt="${h.name}" style="width:48px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0" loading="lazy" onerror="this.style.display='none'">` : `<span style="font-size:1.4rem">🏡</span>`;
-    return `<div class="modal-hab-card" onclick="openHabFromPkModal('${encodeURIComponent(h.name)}')">
+    return `<div class="modal-hab-card" onclick="openHabFromPkModal('${(h.name.replace(/'/g, "\\'"))}')">
       <div style="display:flex;align-items:center;gap:8px">
         ${hImg}
         <div>
@@ -719,9 +720,8 @@ function openPkModal(uid) {
   // Details rows — no emoji prefix for labels, rarity as stars
   const detailRows = [
     `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Primary Location</span><span><strong>${p.primaryLocation||'?'}</strong></span></div>`,
-    `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Rarity</span><span>${rarityHTML(p.rarity)} <strong>${p.rarity||'?'}</strong></span></div>`,
-    `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Active Time</span><span>${timeIcons(p.time)} <strong>${p.time||'?'}</strong></span></div>`,
-    `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Weather</span><span>${weatherIcons(p.weather)} <strong>${p.weather||'?'}</strong></span></div>`,
+    `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Active Time</span><span><strong>${p.time||'?'}</strong></span></div>`,
+    `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Weather</span><span><strong>${p.weather||'?'}</strong></span></div>`,
     p.idealHabitat ? `<div style="display:flex;justify-content:space-between;padding:4px 0"><span style="opacity:0.55">Ideal Habitat</span><span><strong>${p.idealHabitat}</strong></span></div>` : ''
   ].join('');
   document.getElementById('pk-modal-inner').innerHTML=`
@@ -790,7 +790,7 @@ function openHabModal(enc) {
     </div>`).join('');
   const sprUrl = habitatSpriteUrl(hab.habitatId);
   const imgHtml = sprUrl
-    ? `<img src="${sprUrl}" alt="${name}" style="width:100%;height:160px;object-fit:cover;border-radius:0 0 8px 8px;display:block" loading="lazy" onerror="this.style.display='none'">`
+    ? `<img src="${sprUrl}" alt="${name}" style="width:100%;height:fit-content;object-fit:cover;border-radius:0 0 8px 8px;display:block" loading="lazy" onerror="this.style.display='none'">`
     : '';
   const idStr = hab.habitatId ? `<div style="font-size:0.65rem;opacity:0.45;font-family:monospace;text-align:center">#${hab.habitatId}</div>` : '';
   document.getElementById('hab-modal-inner').innerHTML=`
@@ -821,6 +821,7 @@ function initFilters() {
     b.onclick=()=>toggleFilter(activeSpecFilters,s,b);
     specC.appendChild(b);
   });
+  /* DISABLED: Time and Weather Filters
   const times=['Morning','Day','Evening','Night'];
   const tIcons={'Morning':'🌅','Day':'☀️','Evening':'🌆','Night':'🌙'};
   const tC=document.getElementById('time-filters');
@@ -835,6 +836,7 @@ function initFilters() {
     const b=document.createElement('button');b.className='filter-pill';
     b.innerHTML=`${wIcons[w]} ${w}`;b.onclick=()=>toggleFilter(activeWeatherFilters,w,b);wC.appendChild(b);
   });
+  */
 }
 
 initFilters();
