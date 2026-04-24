@@ -16,7 +16,7 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 
 /* ── TOP NAV (desktop) ── */
 .top-tabs{
-  position:sticky;top:0;z-index:200;
+  position:sticky;top:0;z-index:800;
   background:var(--surface);border-bottom:2px solid var(--border);
   display:flex;align-items:stretch;height:var(--tab-h);
   box-shadow:0 2px 12px rgba(0,0,0,0.2);overflow-x:auto;overflow-y:visible;
@@ -34,7 +34,7 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 
 /* ── CONTROLS BAR (sticky below tabs) ── */
 .controls-bar{
-  position:sticky;top:var(--tab-h);z-index:190;
+  position:sticky;top:var(--tab-h);z-index:100;
   background:var(--surface);padding:6px 10px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-height:var(--ctrl-h);
   box-shadow:0 2px 6px rgba(0,0,0,0.08);
@@ -71,7 +71,7 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
   position:sticky;top:calc(var(--tab-h) + var(--ctrl-h));
   background:var(--surface);border-bottom:2px solid var(--border);
   display:flex;align-items:center;gap:3px;flex-wrap:nowrap;
-  overflow:hidden;flex:1;min-width:0;z-index:200;
+  overflow:hidden;flex:1;min-width:0;z-index:100;
 }
 .spec-pills-wrap.collapsed .filter-pill:not(.active){display:none}
 #spec-filters{display:flex;align-items:center;gap:3px;flex-wrap:wrap;overflow:hidden}
@@ -79,7 +79,7 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 
 /* ── QUICK ADD BAR ── */
 .quick-add-bar{
-  position:sticky;top:calc(var(--tab-h) + var(--ctrl-h) + var(--spec-h));z-index:185;
+  position:sticky;top:calc(var(--tab-h) + var(--ctrl-h) + var(--spec-h));z-index:100;
   background:var(--surface);padding:5px 10px;
   border-bottom:2px solid color-mix(in srgb, var(--accent2) 30%, transparent);
   display:flex;align-items:center;gap:5px;flex-wrap:wrap;
@@ -569,6 +569,10 @@ const THEMES = [
     { id: 'dragon',   bg: '#0f0f1f', accent: '#7038f8', order:16},
     { id: 'steel',    bg: '#1a1c1e', accent: '#b8b8d0', order:9},
 ];
+
+function initThemePicker() {
+    const container = document.getElementById('theme-picker-popup');
+    if (!container) return;
 
     container.innerHTML = THEMES.map(theme => `
         <div class="theme-option" data-theme="${theme.id}" onclick="setTheme('${theme.id}')">
