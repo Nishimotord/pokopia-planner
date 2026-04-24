@@ -6,96 +6,174 @@
 <title>Pokopia Planner</title>
 <style>
 :root{
- --bg:#f8f8f2; --surface:#e8e8e0; --surface2:#d8d8d0; --text:#4d4d33; --text-dim:#8a8a6a; --border:#c8c8b0; --accent:#e94560; --accent2:#A8A878;
- --green:#4caf50;--tab-h:48px;--card-min:178px;
+  --bg:#f8f8f2;--surface:#e8e8e0;--surface2:#d8d8d0;--text:#4d4d33;--text-dim:#8a8a6a;
+  --border:#c8c8b0;--accent:#e94560;--accent2:#A8A878;--green:#4caf50;
+  --tab-h:48px;--ctrl-h:44px;--card-min:178px;--bottom-nav-h:0px;--spec-h:0px;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-/* ── TOP NAV ── */
-.top-tabs{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:2px solid var(--border);display:flex;align-items:stretch;height:var(--tab-h);box-shadow:0 2px 12px rgba(0,0,0,0.4);overflow-x:auto;overflow-y:visible}
-.tab-btn{padding:0 16px;font-size:0.8rem;font-weight:700;cursor:pointer;border:none;background:none;color:var(--text-dim);border-bottom:3px solid transparent;transition:0.2s;white-space:nowrap;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+/* ── TOP NAV (desktop) ── */
+.top-tabs{
+  position:sticky;top:0;z-index:200;
+  background:var(--surface);border-bottom:2px solid var(--border);
+  display:flex;align-items:stretch;height:var(--tab-h);
+  box-shadow:0 2px 12px rgba(0,0,0,0.2);overflow-x:auto;overflow-y:visible;
+}
+.tab-btn{
+  padding:0 14px;font-size:0.78rem;font-weight:700;cursor:pointer;border:none;
+  background:none;color:var(--text-dim);border-bottom:3px solid transparent;
+  transition:0.2s;white-space:nowrap;display:flex;align-items:center;gap:5px;
+  -webkit-tap-highlight-color:transparent;flex-shrink:0;
+}
 .tab-btn:hover{color:var(--text)}
 .tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent2)}
 .tab-btn.disabled{opacity:0.32;cursor:not-allowed;pointer-events:none}
-.tab-spacer{flex:1;min-width:8px}
+.tab-spacer{flex:1;min-width:4px}
 
-/* ── CONTROLS BAR ── */
-.controls-bar{background:var(--surface);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.controls-bar input[type=text]{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 11px;font-size:0.78rem;width:160px;outline:none}
+/* ── CONTROLS BAR (sticky below tabs) ── */
+.controls-bar{
+  position:sticky;top:var(--tab-h);z-index:190;
+  background:var(--surface);padding:6px 10px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-height:var(--ctrl-h);
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+.controls-bar input[type=text]{
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:5px 10px;font-size:0.75rem;width:140px;outline:none;flex-shrink:0;
+}
 .controls-bar input[type=text]:focus{border-color:var(--accent2)}
-.ctrl-group{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
-.ctrl-label{font-size:0.68rem;opacity:0.55;white-space:nowrap}
-.ctrl-divider{width:1px;height:22px;background:var(--border);margin:0 4px}
-.filter-pill{padding:3px 9px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:0.65rem;font-weight:700;cursor:pointer;transition:0.13s;user-select:none;-webkit-tap-highlight-color:transparent}
+.ctrl-group{display:flex;align-items:center;gap:3px;flex-wrap:nowrap}
+.ctrl-label{font-size:0.65rem;opacity:0.55;white-space:nowrap}
+.ctrl-divider{width:1px;height:20px;background:var(--border);margin:0 3px;flex-shrink:0}
+.filter-pill{
+  padding:3px 8px;border-radius:14px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-dim);font-size:0.62rem;font-weight:700;
+  cursor:pointer;transition:0.13s;user-select:none;-webkit-tap-highlight-color:transparent;
+  white-space:nowrap;
+}
 .filter-pill.active{background:var(--accent2);color:#000;border-color:var(--accent2)}
-.sort-btn{padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:0.68rem;font-weight:700;cursor:pointer;transition:0.13s}
+.sort-btn{
+  padding:4px 8px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-dim);font-size:0.65rem;font-weight:700;cursor:pointer;transition:0.13s;
+}
 .sort-btn.active{background:var(--accent2);color:#000;border-color:var(--accent2)}
+.ctrl-spacer{flex:1}
+
+/* ── SPECIALTY COLLAPSE ── */
+.spec-collapse-btn{
+  padding:4px 9px;border-radius:6px;border:1px solid var(--accent2);
+  background:none;color:var(--accent2);font-size:0.65rem;font-weight:700;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+}
+.spec-pills-wrap{
+  position:sticky;top:calc(var(--tab-h) + var(--ctrl-h));
+  background:var(--surface);border-bottom:2px solid var(--border);
+  display:flex;align-items:center;gap:3px;flex-wrap:nowrap;
+  overflow:hidden;flex:1;min-width:0;z-index:200;
+}
+.spec-pills-wrap.collapsed .filter-pill:not(.active){display:none}
+#spec-filters{display:flex;align-items:center;gap:3px;flex-wrap:wrap;overflow:hidden}
+
 
 /* ── QUICK ADD BAR ── */
-.quick-add-bar{background:var(--surface);padding:6px 12px;border-bottom:2px solid var(--accent2)33;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.qa-label{font-size:0.68rem;font-weight:700;color:var(--accent2);white-space:nowrap;display:flex;align-items:center;gap:5px}
-.qa-label .qa-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2);display:inline-block;animation:pulse 1.4s infinite}
+.quick-add-bar{
+  position:sticky;top:calc(var(--tab-h) + var(--ctrl-h) + var(--spec-h));z-index:185;
+  background:var(--surface);padding:5px 10px;
+  border-bottom:2px solid color-mix(in srgb, var(--accent2) 30%, transparent);
+  display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+}
+.qa-label{font-size:0.65rem;font-weight:700;color:var(--accent2);white-space:nowrap;display:flex;align-items:center;gap:4px}
+.qa-label .qa-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);display:inline-block;animation:pulse 1.4s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.qa-area-btn{padding:4px 11px;border-radius:16px;border:2px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:0.68rem;font-weight:700;cursor:pointer;transition:0.13s;user-select:none;white-space:nowrap}
+.qa-area-btn{
+  padding:3px 10px;border-radius:14px;border:2px solid var(--border);
+  background:var(--surface2);color:var(--text-dim);font-size:0.65rem;font-weight:700;
+  cursor:pointer;transition:0.13s;user-select:none;white-space:nowrap;
+}
 .qa-area-btn:hover{border-color:var(--accent2);color:var(--text)}
 .qa-area-btn.active{background:var(--accent2);color:#000;border-color:var(--accent2)}
 .qa-area-btn.wild-btn.active{background:var(--green);border-color:var(--green);color:#fff}
-.qa-toggle{padding:4px 10px;border-radius:6px;border:1px solid var(--accent2);background:none;color:var(--accent2);font-size:0.68rem;font-weight:700;cursor:pointer;transition:0.13s}
-.qa-toggle:hover{background:var(--accent2)22}
+.qa-toggle{
+  padding:3px 9px;border-radius:6px;border:1px solid var(--accent2);
+  background:none;color:var(--accent2);font-size:0.65rem;font-weight:700;cursor:pointer;flex-shrink:0;
+}
 .quick-add-bar.hidden{display:none}
+.qa-trash-btn{
+  padding:3px 8px;border-radius:6px;border:1px solid var(--accent);
+  background:none;color:var(--accent);font-size:0.72rem;cursor:pointer;margin-left:auto;flex-shrink:0;
+}
+.qa-trash-btn:hover{background:var(--accent);color:#fff}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
+  z-index:900;align-items:center;justify-content:center;padding:20px;
+}
+.confirm-overlay.open{display:flex}
+.confirm-box{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:24px;max-width:340px;width:100%;text-align:center;
+}
+.confirm-box p{font-size:0.9rem;margin-bottom:18px;line-height:1.4}
+.confirm-btns{display:flex;gap:10px;justify-content:center}
+.confirm-btn{
+  padding:8px 22px;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;border:none;
+}
+.confirm-btn.danger{background:var(--accent);color:#fff}
+.confirm-btn.cancel{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
 
 /* ── CARD GRID ── */
-.main-content{padding:10px;padding-bottom:80px}
+.main-content{padding:10px;padding-bottom:calc(20px + var(--bottom-nav-h))}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--card-min),1fr));gap:9px}
 
 /* ── POKEMON CARD ── */
-.pk-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:9px;cursor:pointer;transition:transform 0.12s,box-shadow 0.12s,border-color 0.15s;position:relative;user-select:none;-webkit-tap-highlight-color:transparent}
-.pk-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.pk-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:11px;
+  padding:9px;cursor:pointer;transition:transform 0.12s,box-shadow 0.12s,border-color 0.15s;
+  position:relative;user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.pk-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
 .pk-card:active{transform:scale(0.97)}
-.pk-card.in-area{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(245,166,35,0.2)}
-.pk-card.qa-hover{box-shadow:0 0 0 3px var(--green)!important;border-color:var(--green)!important}
-.pk-id{font-size:0.62rem;opacity:0.45;font-family:monospace;text-align:center;margin-bottom:2px}
+.pk-card.in-area{border-color:var(--accent2);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent2) 20%,transparent)}
+.pk-id{font-size:0.6rem;opacity:0.45;font-family:monospace;text-align:center;margin-bottom:2px}
 .pk-card img{width:68px;height:68px;image-rendering:pixelated;display:block;margin:0 auto}
-.pk-name{text-align:center;font-size:0.82rem;font-weight:700;margin:4px 0 3px}
-.pk-types{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:5px}
-.type-badge{font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:10px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5)}
-.pk-specs{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:4px;min-height:20px}
-.spec-tag{font-size:0.6rem;background:var(--surface2);border-radius:6px;padding:2px 5px;display:flex;align-items:center;gap:2px}
-.pk-rarity{text-align:center;font-size:0.7rem;margin-bottom:3px}
-.pk-tw{display:flex;justify-content:center;gap:8px;font-size:0.75rem}
-.area-badge{position:absolute;top:4px;right:4px;background:var(--accent2);color:#000;font-size:0.46rem;font-weight:700;padding:2px 5px;border-radius:4px;max-width:68px;text-align:center;line-height:1.3}
-.pokopia-badge{position:absolute;top:4px;left:4px;background:#ce93d8;color:#000;font-size:0.46rem;font-weight:700;padding:2px 4px;border-radius:4px}
+.pk-name{text-align:center;font-size:0.8rem;font-weight:700;margin:4px 0 3px}
+.pk-types{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:4px}
+.type-badge{font-size:0.52rem;font-weight:700;padding:2px 6px;border-radius:10px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5)}
+.pk-specs{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:3px;min-height:18px}
+.spec-tag{font-size:0.58rem;background:var(--surface2);border-radius:6px;padding:2px 4px;display:flex;align-items:center;gap:2px}
+.pk-tw{display:flex;justify-content:center;gap:8px;font-size:0.72rem}
+.area-badge{position:absolute;top:4px;right:4px;background:var(--accent2);color:#000;font-size:0.44rem;font-weight:700;padding:2px 4px;border-radius:4px;max-width:66px;text-align:center;line-height:1.3}
+.pokopia-badge{position:absolute;top:4px;left:4px;background:#ce93d8;color:#000;font-size:0.44rem;font-weight:700;padding:2px 4px;border-radius:4px}
+.primary-star{position:absolute;bottom:4px;left:5px;font-size:0.68rem;line-height:1}
+.rarity-stars{white-space:nowrap}
+.rarity-stars .star-lit{color:#f5a623}
+.rarity-stars .star-dim{color:var(--border);opacity:0.6}
 
 /* ── HABITAT CARD ── */
 .hab-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px;cursor:pointer;transition:transform 0.12s;overflow:hidden}
 .hab-card:hover{transform:translateY(-2px)}
 .hab-img{width:100%;height:fit-content;object-fit:cover;border-radius:6px;margin-bottom:5px;display:block}
-.hab-id{font-size:0.62rem;opacity:0.45;font-family:monospace;text-align:center}
-.hab-name{font-size:0.8rem;font-weight:700;text-align:center;margin:4px 0;line-height:1.3}
+.hab-id{font-size:0.6rem;opacity:0.45;font-family:monospace;text-align:center}
+.hab-name{font-size:0.78rem;font-weight:700;text-align:center;margin:4px 0;line-height:1.3}
 .hab-pokemon{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:7px}
-.hab-pokemon img{width:30px;height:30px;image-rendering:pixelated}
-/* primary location star badge on pokemon card */
-.primary-star{position:absolute;bottom:5px;left:5px;font-size:0.7rem;line-height:1}
-/* rarity stars */
-.rarity-stars{white-space:nowrap}
-.rarity-stars .star-lit{color:#f5a623}
-.rarity-stars .star-dim{color:var(--border);opacity:0.6}
+.hab-pokemon img{width:28px;height:28px;image-rendering:pixelated}
 
 /* ── AREAS TAB ── */
-.areas-container{padding:10px}
-.area-section{background:var(--surface);border:1px solid var(--border);border-radius:11px;margin-bottom:9px;overflow:hidden}
-.area-header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
-.area-header:hover{background:rgba(255,255,255,0.03)}
-.area-title{font-size:0.9rem;font-weight:700;display:flex;align-items:center;gap:7px}
-.area-count{font-size:0.65rem;background:var(--surface2);padding:2px 7px;border-radius:10px;opacity:0.65}
-.area-chev{font-size:0.75rem;opacity:0.45;transition:transform 0.2s}
+.areas-container{padding:8px}
+.area-section{background:var(--surface);border:1px solid var(--border);border-radius:11px;margin-bottom:8px;overflow:hidden}
+.area-header{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.area-header:hover{background:rgba(0,0,0,0.03)}
+.area-title{font-size:0.88rem;font-weight:700;display:flex;align-items:center;gap:6px}
+.area-count{font-size:0.63rem;background:var(--surface2);padding:2px 7px;border-radius:10px;opacity:0.65}
+.area-chev{font-size:0.72rem;opacity:0.45;transition:transform 0.2s}
 .area-chev.open{transform:rotate(180deg)}
-.area-body{display:none;padding:9px;border-top:1px solid var(--border)}
+.area-body{display:none;padding:8px;border-top:1px solid var(--border)}
 .area-body.open{display:block}
-.area-pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px}
-.area-empty{text-align:center;padding:18px;opacity:0.38;font-size:0.82rem}
+.area-pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
+.area-empty{text-align:center;padding:16px;opacity:0.38;font-size:0.8rem}
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:500;align-items:center;justify-content:center;padding:14px}
@@ -122,84 +200,86 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 .loc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
 .chip{font-size:0.68rem;background:var(--surface2);padding:3px 8px;border-radius:9px}
-
-/* hab modal pokemon list */
 .hab-poke-mini{display:flex;flex-wrap:wrap;gap:5px}
 .hab-poke-chip{display:flex;align-items:center;gap:4px;background:var(--surface2);border-radius:7px;padding:3px 7px;cursor:pointer;font-size:0.7rem;transition:background 0.13s}
 .hab-poke-chip:hover{background:var(--border)}
 .hab-poke-chip img{width:26px;height:26px;image-rendering:pixelated}
 
+/* habitat conditions chips */
+.condition-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 9px;font-size:0.72rem;font-weight:600}
+.condition-qty{font-size:0.65rem;opacity:0.7;font-family:monospace}
+
 /* ── TOAST ── */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:10px 18px;border-radius:20px;font-size:0.8rem;font-weight:600;opacity:0;transition:opacity 0.25s,transform 0.25s;pointer-events:none;z-index:900;white-space:nowrap}
+.toast{position:fixed;bottom:calc(16px + var(--bottom-nav-h));left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:9px 17px;border-radius:20px;font-size:0.78rem;font-weight:600;opacity:0;transition:opacity 0.25s,transform 0.25s;pointer-events:none;z-index:1000;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-@media(max-width:480px){:root{--card-min:150px}.controls-bar input[type=text]{width:130px}}
-
-/* ── THEMES ── */
-/* normal (default — already in :root) */
-/* cool: soft blue-grey mid-tone — easy on eyes, readable */
-
-/* --- FULL ELEMENTAL REGISTRY --- */
-/* Pastel/Light Group (Dark Ink Text) */
-body.theme-normal   { --bg:#f8f8f2; --surface:#e8e8e0; --surface2:#d8d8d0; --text:#4d4d33; --text-dim:#8a8a6a; --border:#c8c8b0; --accent2:#A8A878; }
-body.theme-fire     { --bg:#fff5f0; --surface:#ffdec9; --surface2:#ffd0b3; --text:#853000; --text-dim:#b36b4d; --border:#ffb38a; --accent2:#f08030; }
-body.theme-grass    { --bg:#f2fff0; --surface:#d4f5d0; --surface2:#bff0b8; --text:#1a4d00; --text-dim:#5c8a5c; --border:#a8e69c; --accent2:#78c850; }
-body.theme-electric { --bg:#fffdf0; --surface:#fff6cc; --surface2:#fff0b3; --text:#5c4d00; --text-dim:#8a825c; --border:#ffe68a; --accent2:#f8d030; }
-body.theme-bug      { --bg:#f9fff0; --surface:#eef5d0; --surface2:#e6f0b8; --text:#3d4d00; --text-dim:#7a8a5c; --border:#cce69c; --accent2:#a8b820; }
-body.theme-fairy    { --bg:#fff5f7; --surface:#ffd9e6; --surface2:#ffccd9; --text:#662d3d; --text-dim:#8a5c6a; --border:#ffb0c4; --accent2:#ee99ac; }
-body.theme-ice      { --bg:#f0ffff; --surface:#d0fafa; --surface2:#b8f5f5; --text:#004d4d; --text-dim:#5c8a8a; --border:#9ce6e6; --accent2:#98d8d8; }
-
-/* Mid-Range/Earthy (Rich Saturated Colors) */
-body.theme-ground   { --bg:#fdf5e6; --surface:#e0c068; --surface2:#c5a550; --text:#4d3d00; --text-dim:#7a6a40; --border:#ffffff; --accent2:#4d3d00; }
-body.theme-rock     { --bg:#f5f5f0; --surface:#b8a038; --surface2:#968028; --text:#ffffff; --text-dim:#e8e0c0; --border:#d5c48c; --accent2:#ffffff; }
-body.theme-fighting { --bg:#fff0f0; --surface:#c03028; --surface2:#902018; --text:#ffffff; --text-dim:#ffc0c0; --border:#e06060; --accent2:#ffffff; }
-body.theme-psychic  { --bg:#fff0f5; --surface:#f85888; --surface2:#d04070; --text:#ffffff; --text-dim:#ffd0e6; --border:#ff99cc; --accent2:#ffffff; }
-body.theme-water    { --bg:#e0f0ff; --surface:#6890f0; --surface2:#4a70c0; --text:#ffffff; --text-dim:#d0e0ff; --border:#a0c0ff; --accent2:#ffffff; }
-body.theme-flying   { --bg:#f0eaff; --surface:#a890f0; --surface2:#8a70d0; --text:#ffffff; --text-dim:#e0d5ff; --border:#cbbfff; --accent2:#ffffff; }
-
-/* Dark/Heavy Group (Glowing Accents) */
-body.theme-poison   { --bg:#1a0a1f; --surface:#a040a0; --surface2:#7a307a; --text:#ffffff; --text-dim:#e0b0e0; --border:#c060c0; --accent2:#f080f0; }
-body.theme-ghost    { --bg:#0f0a1a; --surface:#705898; --surface2:#4a3870; --text:#ffffff; --text-dim:#cbbfff; --border:#9078b8; --accent2:#a890f0; }
-body.theme-dragon   { --bg:#0f0f1f; --surface:#7038f8; --surface2:#4a20b0; --text:#ffffff; --text-dim:#c0a0ff; --border:#9060ff; --accent2:#b080ff; }
-body.theme-dark-type { --bg:#121212; --surface:#2c2c2c; --surface2:#1a1a1a; --text:#ffffff; --text-dim:#888888; --border:#444444; --accent2:#705848; }
-body.theme-steel    { --bg:#1a1c1e; --surface:#b8b8d0; --surface2:#8a8aa0; --text:#1a1c1e; --text-dim:#4a4a60; --border:#ffffff; --accent2:#707090; }
-
-/* ── THEME PICKER POPUP ── */
+/* ── THEME PICKER (in controls bar) ── */
 .theme-picker-wrap{position:relative;flex-shrink:0}
-.theme-picker-btn{padding:0 12px;background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text-dim);height:var(--tab-h);display:flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:700;transition:color 0.15s}
+.theme-picker-btn{
+  padding:4px 9px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-dim);font-size:0.65rem;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;
+}
 .theme-picker-btn:hover{color:var(--text)}
-.theme-picker-popup{display:none;position:fixed;top:calc(var(--tab-h) + 4px);right:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:500;min-width:160px}
+.theme-picker-popup{
+  display:none;position:fixed;right:8px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:600;
+  min-width:160px;max-height:70vh;overflow-y:auto;
+}
 .theme-picker-popup.open{display:block}
-.theme-option{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;transition:background 0.12s;border:2px solid transparent}
+.theme-option{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;cursor:pointer;transition:background 0.12s;border:2px solid transparent}
 .theme-option:hover{background:var(--surface2)}
 .theme-option.selected{border-color:var(--accent2)}
-.theme-swatch{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);flex-shrink:0}
-.theme-name{font-size:0.75rem;font-weight:700;color:var(--text)}
+.theme-swatch{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);flex-shrink:0}
+.theme-name{font-size:0.73rem;font-weight:700;color:var(--text)}
+
+/* ── THEMES ── */
+body.theme-normal   {--bg:#f8f8f2;--surface:#e8e8e0;--surface2:#d8d8d0;--text:#4d4d33;--text-dim:#8a8a6a;--border:#c8c8b0;--accent2:#A8A878}
+body.theme-fire     {--bg:#fff5f0;--surface:#ffdec9;--surface2:#ffd0b3;--text:#853000;--text-dim:#b36b4d;--border:#ffb38a;--accent2:#f08030}
+body.theme-grass    {--bg:#f2fff0;--surface:#d4f5d0;--surface2:#bff0b8;--text:#1a4d00;--text-dim:#5c8a5c;--border:#a8e69c;--accent2:#78c850}
+body.theme-electric {--bg:#fffdf0;--surface:#fff6cc;--surface2:#fff0b3;--text:#5c4d00;--text-dim:#8a825c;--border:#ffe68a;--accent2:#f8d030}
+body.theme-bug      {--bg:#f9fff0;--surface:#eef5d0;--surface2:#e6f0b8;--text:#3d4d00;--text-dim:#7a8a5c;--border:#cce69c;--accent2:#a8b820}
+body.theme-fairy    {--bg:#fff5f7;--surface:#ffd9e6;--surface2:#ffccd9;--text:#662d3d;--text-dim:#8a5c6a;--border:#ffb0c4;--accent2:#ee99ac}
+body.theme-ice      {--bg:#f0ffff;--surface:#d0fafa;--surface2:#b8f5f5;--text:#004d4d;--text-dim:#5c8a8a;--border:#9ce6e6;--accent2:#98d8d8}
+body.theme-ground   {--bg:#fdf5e6;--surface:#e0c068;--surface2:#c5a550;--text:#4d3d00;--text-dim:#7a6a40;--border:#ffffff;--accent2:#4d3d00}
+body.theme-rock     {--bg:#f5f5f0;--surface:#b8a038;--surface2:#968028;--text:#ffffff;--text-dim:#e8e0c0;--border:#d5c48c;--accent2:#ffffff}
+body.theme-fighting {--bg:#fff0f0;--surface:#c03028;--surface2:#902018;--text:#ffffff;--text-dim:#ffc0c0;--border:#e06060;--accent2:#ffffff}
+body.theme-psychic  {--bg:#fff0f5;--surface:#f85888;--surface2:#d04070;--text:#ffffff;--text-dim:#ffd0e6;--border:#ff99cc;--accent2:#ffffff}
+body.theme-water    {--bg:#e0f0ff;--surface:#6890f0;--surface2:#4a70c0;--text:#ffffff;--text-dim:#d0e0ff;--border:#a0c0ff;--accent2:#ffffff}
+body.theme-flying   {--bg:#f0eaff;--surface:#a890f0;--surface2:#8a70d0;--text:#ffffff;--text-dim:#e0d5ff;--border:#cbbfff;--accent2:#ffffff}
+body.theme-poison   {--bg:#1a0a1f;--surface:#a040a0;--surface2:#7a307a;--text:#ffffff;--text-dim:#e0b0e0;--border:#c060c0;--accent2:#f080f0}
+body.theme-ghost    {--bg:#0f0a1a;--surface:#705898;--surface2:#4a3870;--text:#ffffff;--text-dim:#cbbfff;--border:#9078b8;--accent2:#a890f0}
+body.theme-dragon   {--bg:#0f0f1f;--surface:#7038f8;--surface2:#4a20b0;--text:#ffffff;--text-dim:#c0a0ff;--border:#9060ff;--accent2:#b080ff}
+body.theme-dark-type{--bg:#121212;--surface:#2c2c2c;--surface2:#1a1a1a;--text:#ffffff;--text-dim:#888888;--border:#444444;--accent2:#705848}
+body.theme-steel    {--bg:#1a1c1e;--surface:#b8b8d0;--surface2:#8a8aa0;--text:#1a1c1e;--text-dim:#4a4a60;--border:#ffffff;--accent2:#707090}
+
 </style>
 </head>
 <body>
 
+<!-- TOP / BOTTOM NAV TABS -->
 <div class="top-tabs">
-  <button class="tab-btn active" data-tab="pokemon" onclick="switchTab('pokemon')">🎮 Pokémon</button>
-  <button class="tab-btn" data-tab="habitats" onclick="switchTab('habitats')">🏡 Habitats</button>
-  <button class="tab-btn" data-tab="areas" onclick="switchTab('areas')">🗺️ Areas</button>
-  <button class="tab-btn disabled" title="Coming soon">📦 Items</button>
-  <button class="tab-btn disabled" title="Coming soon">📜 Recipes</button>
-  <button class="tab-btn disabled" title="Coming soon">🏗️ Buildings</button>
-  <button class="tab-btn disabled" title="Coming soon">🏺 Collectibles</button>
+  <button class="tab-btn active" data-tab="pokemon" onclick="switchTab('pokemon')">🎮 <span>Pokémon</span></button>
+  <button class="tab-btn" data-tab="habitats" onclick="switchTab('habitats')">🏡 <span>Habitats</span></button>
+  <button class="tab-btn" data-tab="areas" onclick="switchTab('areas')">🗺️ <span>Areas</span></button>
+  <button class="tab-btn disabled" title="Coming soon">📦 <span>Items</span></button>
+  <button class="tab-btn disabled" title="Coming soon">📜 <span>Recipes</span></button>
+  <button class="tab-btn disabled" title="Coming soon">🏗️ <span>Build</span></button>
+  <button class="tab-btn disabled" title="Coming soon">🏺 <span>Collect</span></button>
   <div class="tab-spacer"></div>
   <div class="theme-picker-wrap" id="theme-picker-wrap">
-  <button class="theme-picker-btn" onclick="toggleThemePicker()" title="Choose theme">🎨 Theme</button>
-  <div class="theme-picker-popup" id="theme-picker-popup"></div>
-</div>
+    <button class="theme-picker-btn" onclick="toggleThemePicker()" title="Choose theme">🎨 Theme</button>
+    <div class="theme-picker-popup" id="theme-picker-popup"></div>
+  </div>
 </div>
 
 <!-- POKEMON TAB -->
 <div id="tab-pokemon">
-  <div class="controls-bar">
+  <div class="controls-bar" id="ctrl-pokemon">
     <input type="text" id="pk-search" placeholder="Search Pokémon…" oninput="renderPokemon()">
     <div class="ctrl-divider"></div>
     <div class="ctrl-group">
@@ -208,28 +288,23 @@ body.theme-steel    { --bg:#1a1c1e; --surface:#b8b8d0; --surface2:#8a8aa0; --tex
       <button class="sort-btn" id="sort-name" onclick="setSort('name')">Name</button>
     </div>
     <div class="ctrl-divider"></div>
-    <div class="ctrl-group" id="spec-filters"><span class="ctrl-label">Specialty:</span></div>
-     <!-- DISABLED: Time and Weather Filters
-      <div class="ctrl-divider"></div>
-      <div class="ctrl-group" id="time-filters"><span class="ctrl-label">Time:</span></div>
-      <div class="ctrl-divider"></div>
-      <div class="ctrl-group" id="weather-filters"><span class="ctrl-label">Weather:</span></div>
-      <div class="ctrl-divider"></div>
-    -->
+    <span class="ctrl-label">Filter:</span>
+    <button class="spec-collapse-btn" id="spec-toggle-btn" onclick="toggleSpecCollapse()">Specialty ▾</button>
+    <div class="ctrl-divider"></div>
+    <div class="ctrl-spacer"></div>
     <button class="qa-toggle" onclick="toggleQuickAdd()" id="qa-toggle-btn">⚡ Quick Add</button>
   </div>
-
-  <!-- Quick Add bar (hidden until toggled) -->
+  <div id="spec-filters" class="spec-pills-wrap collapsed"></div>
   <div class="quick-add-bar hidden" id="quick-add-bar">
-    <div class="qa-label"><span class="qa-dot"></span>Quick Add — tap a Pokémon to instantly place it:</div>
+    <div class="qa-label"><span class="qa-dot"></span>Quick Add:</div>
     <button class="qa-area-btn wild-btn" id="qa-wild" onclick="setQAArea('wild')">🌿 Wild</button>
-    <button class="qa-area-btn" id="qa-ww" onclick="setQAArea('Withered Wastelands')">🏜️ Withered Wastelands</button>
-    <button class="qa-area-btn" id="qa-bb" onclick="setQAArea('Bleak Beach')">🏖️ Bleak Beach</button>
-    <button class="qa-area-btn" id="qa-rr" onclick="setQAArea('Rocky Ridges')">⛰️ Rocky Ridges</button>
-    <button class="qa-area-btn" id="qa-ss" onclick="setQAArea('Sparkling Skylands')">☁️ Sparkling Skylands</button>
-    <button class="qa-area-btn" id="qa-pt" onclick="setQAArea('Palette Town')">🏘️ Palette Town</button>
+    <button class="qa-area-btn" id="qa-ww" onclick="setQAArea('Withered Wastelands')">🏜️ Withered</button>
+    <button class="qa-area-btn" id="qa-bb" onclick="setQAArea('Bleak Beach')">🏖️ Beach</button>
+    <button class="qa-area-btn" id="qa-rr" onclick="setQAArea('Rocky Ridges')">⛰️ Ridges</button>
+    <button class="qa-area-btn" id="qa-ss" onclick="setQAArea('Sparkling Skylands')">☁️ Skylands</button>
+    <button class="qa-area-btn" id="qa-pt" onclick="setQAArea('Palette Town')">🏘️ Palette</button>
+    <button class="qa-trash-btn" onclick="confirmReturnAllToWild()" title="Return all to wild">🗑️ Return All</button>
   </div>
-
   <div class="main-content">
     <div class="card-grid" id="pokemon-grid"></div>
   </div>
@@ -237,7 +312,7 @@ body.theme-steel    { --bg:#1a1c1e; --surface:#b8b8d0; --surface2:#8a8aa0; --tex
 
 <!-- HABITATS TAB -->
 <div id="tab-habitats" style="display:none">
-  <div class="controls-bar">
+  <div class="controls-bar" id="ctrl-habitats">
     <input type="text" id="hab-search" placeholder="Search habitats…" oninput="renderHabitats()">
     <div class="ctrl-divider"></div>
     <div class="ctrl-group">
@@ -245,6 +320,7 @@ body.theme-steel    { --bg:#1a1c1e; --surface:#b8b8d0; --surface2:#8a8aa0; --tex
       <button class="sort-btn active" id="hab-sort-id" onclick="setHabSort('id')">ID</button>
       <button class="sort-btn" id="hab-sort-name" onclick="setHabSort('name')">Name</button>
     </div>
+    <div class="ctrl-spacer"></div>
   </div>
   <div class="main-content">
     <div class="card-grid" id="habitats-grid"></div>
@@ -253,6 +329,10 @@ body.theme-steel    { --bg:#1a1c1e; --surface:#b8b8d0; --surface2:#8a8aa0; --tex
 
 <!-- AREAS TAB -->
 <div id="tab-areas" style="display:none">
+  <div class="controls-bar" id="ctrl-areas">
+    <input type="text" id="area-search" placeholder="Search Pokémon in areas…" oninput="renderAreas()">
+    <div class="ctrl-spacer"></div>
+  </div>
   <div class="areas-container" id="areas-container"></div>
 </div>
 
@@ -266,122 +346,144 @@ body.theme-steel    { --bg:#1a1c1e; --surface:#b8b8d0; --surface2:#8a8aa0; --tex
   <div class="modal" id="hab-modal-inner"></div>
 </div>
 
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirm-msg"></p>
+    <div class="confirm-btns">
+      <button class="confirm-btn cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-btn danger" id="confirm-ok-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script src="pokopia-pokemon.js"></script>
 <script src="pokopia-habitats.js"></script>
 <script>
-const TYPE_COLORS = {"Normal": "#A8A878", "Fire": "#F08030", "Water": "#6890F0", "Grass": "#78C850", "Electric": "#F8D030", "Ice": "#98D8D8", "Fighting": "#C03028", "Poison": "#A040A0", "Ground": "#E0C068", "Flying": "#A890F0", "Psychic": "#F85888", "Bug": "#A8B020", "Rock": "#B8A038", "Ghost": "#705898", "Dragon": "#7038F8", "Steel": "#B8B8D0", "Dark": "#705848", "Fairy": "#EE99AC"};
-const SPEC_EMOJI  = {"Grow": "\ud83c\udf31", "Burn": "\ud83d\udd25", "Water": "\ud83d\udca7", "Fly": "\ud83e\udeb6", "Search": "\ud83d\udd0d", "Chop": "\ud83e\ude93", "Build": "\ud83d\udd28", "Crush": "\ud83d\udca5", "Bulldoze": "\ud83e\udea8", "Trade": "\ud83e\udd1d", "Teleport": "\u2728", "Generate": "\u26a1", "Gather": "\ud83d\udce6", "Litter": "\ud83c\udf3f", "Hype": "\ud83c\udf89", "Recycle": "\u267b\ufe0f", "Yawn": "\ud83d\ude34", "Collect": "\ud83d\udcb0", "Explode": "\ud83d\udca3", "Paint": "\ud83c\udfa8", "DJ": "\ud83c\udfa7", "Illuminate": "\ud83d\udca1", "Transform": "\ud83d\udd04", "Appraise": "\ud83d\udd0e", "Storage": "\ud83d\uddc3\ufe0f", "Gather Honey": "\ud83c\udf6f", "Dream Island": "\ud83c\udfdd\ufe0f", "Eat": "\ud83c\udf7d\ufe0f", "Engineer": "\u2699\ufe0f", "Party": "\ud83c\udf8a", "Rarify": "\u2b50", "???": "\u2753"};
-
-// Serebii specialty icon URL — slug is lowercase, spaces→hyphens, ' Honey'→'honey'
-function specImgUrl(s) {
-  const slug = s.toLowerCase().replace(/\s+/g,'-');
-  return `https://www.serebii.net/pokemonpokopia/pokedex/specialty/${slug}.png`;
-}
-function specTagHTML(s) {
-  return `<span class="spec-tag" title="${s}"><img src="${specImgUrl(s)}" alt="${s}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle" onerror="this.replaceWith(document.createTextNode('${SPEC_EMOJI[s]||'?'}'))"> ${s}</span>`;
-}
-
-// Rarity: always 3 stars, filled vs dimmed
-function rarityHTML(r) {
-  const count = r==='Very Rare' ? 3 : r==='Rare' ? 2 : r ? 1 : 0;
-  let html = '<span class="rarity-stars">';
-  for(let i=1;i<=3;i++) html += `<span class="${i<=count?'star-lit':'star-dim'}">★</span>`;
-  return html + '</span>';
-}
+// ── CONSTANTS ──
+const TYPE_COLORS = {"Normal":"#A8A878","Fire":"#F08030","Water":"#6890F0","Grass":"#78C850","Electric":"#F8D030","Ice":"#98D8D8","Fighting":"#C03028","Poison":"#A040A0","Ground":"#E0C068","Flying":"#A890F0","Psychic":"#F85888","Bug":"#A8B020","Rock":"#B8A038","Ghost":"#705898","Dragon":"#7038F8","Steel":"#B8B8D0","Dark":"#705848","Fairy":"#EE99AC"};
+const SPEC_EMOJI  = {"Grow":"🌱","Burn":"🔥","Water":"💧","Fly":"🪶","Search":"🔍","Chop":"🪓","Build":"🔨","Crush":"💥","Bulldoze":"🪨","Trade":"🤝","Teleport":"✨","Generate":"⚡","Gather":"📦","Litter":"🌿","Hype":"🎉","Recycle":"♻️","Yawn":"😴","Collect":"💰","Explode":"💣","Paint":"🎨","DJ":"🎧","Illuminate":"💡","Transform":"🔄","Appraise":"🔎","Storage":"🗃️","Gather Honey":"🍯","Dream Island":"🏝️","Eat":"🍽️","Engineer":"⚙️","Party":"🎊","Rarify":"⭐","???":"❓"};
 
 const AREAS = [
-  {key:'Withered Wastelands', name:'Withered Wastelands', icon:'🏜️', qaId:'qa-ww'},
-  {key:'Bleak Beach',         name:'Bleak Beach',         icon:'🏖️', qaId:'qa-bb'},
-  {key:'Rocky Ridges',        name:'Rocky Ridges',        icon:'⛰️', qaId:'qa-rr'},
-  {key:'Sparkling Skylands',  name:'Sparkling Skylands',  icon:'☁️', qaId:'qa-ss'},
-  {key:'Palette Town',        name:'Palette Town',        icon:'🏘️', qaId:'qa-pt'},
+  {key:'Withered Wastelands',name:'Withered Wastelands',icon:'🏜️',qaId:'qa-ww'},
+  {key:'Bleak Beach',        name:'Bleak Beach',        icon:'🏖️',qaId:'qa-bb'},
+  {key:'Rocky Ridges',       name:'Rocky Ridges',       icon:'⛰️',qaId:'qa-rr'},
+  {key:'Sparkling Skylands', name:'Sparkling Skylands', icon:'☁️',qaId:'qa-ss'},
+  {key:'Palette Town',       name:'Palette Town',       icon:'🏘️',qaId:'qa-pt'},
 ];
 
-// Pokopia-unique forms (show a special badge)
 const POKOPIA_UNIQUE = new Set(['Peakychu','Mosslax','Professor Tangrowth','Smearguru (Smeargle)','Chef Dente (Greedent)','Tinkmaster (Tinkaton)']);
 const UNIQUE_FORMS = [
-  {name: 'Peakychu', urlStr: '-peakychu'},
-  {name: 'Mosslax', urlStr: '-mosslax'},
-  {name: 'Professor Tangrowth',urlStr: '-professortangrowth'},
-  {name: 'Smearguru (Smeargle)',urlStr: '-smearguru'},
-  {name: 'Toxtricity Amped Form',urlStr: '-toxtricityampedform'},
-  {name: 'Toxtricity Low Key Form',urlStr: '-toxtricitylowkeyform'},
-  {name: 'Tinkmaster (Tinkaton)',urlStr: '-tinkmeister'},
-  {name: 'Shellos East Sea',urlStr: '-shelloseastsea'},
-  {name: 'Gastrodon East Sea',urlStr: '-gastrodoneastsea'},
-  {name: 'Paldean Wooper',urlStr: '-p'},
-  {name: 'Tatsugiri Curly Form',urlStr: '-tatsugiricurlyform'},
-  {name: 'Tatsugiri Droopy Form',urlStr: '-tatsugiridroopyform'},
-  {name: 'Tatsugiri Stretchy Form',urlStr: '-tatsugiristretchyform'},
-  {name: 'Chef Dente (Greedent)',urlStr: '-cook'},
-  {name: 'Stereo Rotom',urlStr: '-stereorotom'}
-  
+  {name:'Peakychu',               urlStr:'-peakychu'},
+  {name:'Mosslax',                urlStr:'-mosslax'},
+  {name:'Professor Tangrowth',    urlStr:'-professortangrowth'},
+  {name:'Smearguru (Smeargle)',   urlStr:'-smearguru'},
+  {name:'Toxtricity Amped Form',  urlStr:'-toxtricityampedform'},
+  {name:'Toxtricity Low Key Form',urlStr:'-toxtricitylowkeyform'},
+  {name:'Tinkmaster (Tinkaton)',  urlStr:'-tinkmeister'},
+  {name:'Shellos East Sea',       urlStr:'-shelloseastsea'},
+  {name:'Gastrodon East Sea',     urlStr:'-gastrodoneastsea'},
+  {name:'Paldean Wooper',         urlStr:'-p'},
+  {name:'Tatsugiri Curly Form',   urlStr:'-tatsugiricurlyform'},
+  {name:'Tatsugiri Droopy Form',  urlStr:'-tatsugiridroopyform'},
+  {name:'Tatsugiri Stretchy Form',urlStr:'-tatsugiristretchyform'},
+  {name:'Chef Dente (Greedent)',  urlStr:'-cook'},
+  {name:'Stereo Rotom',  urlStr:'-stereorotom'},
 ];
-// ALL_POKEMON loaded from pokopia-data.js (see <script src="pokopia-data.js">)
 
 // ── STATE ──
 let activeSort = 'id';
 let activeHabSort = 'id';
 let activeSpecFilters = [];
-let activeTimeFilters  = [];
-let activeWeatherFilters = [];
-// location: uid -> areaKey | null
+let specCollapsed = true;
+// pokemonLocation: uid → areaKey  (no entry = in wild)
 const pokemonLocation = {};
 // Quick Add
 let qaActive = false;
-let qaTarget = null; // area key or 'wild' or null
+let qaTarget = null;
+
+// ── LOCALSTORAGE PERSISTENCE ──
+const LS_KEY = 'pokopia-locations';
+
+function saveLocations() {
+  // Only save pokemon that are actually in an area (not wild)
+  const toSave = {};
+  for (const [uid, area] of Object.entries(pokemonLocation)) {
+    if (area) toSave[uid] = area;
+  }
+  localStorage.setItem(LS_KEY, JSON.stringify(toSave));
+}
+
+function loadLocations() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    // Only restore if uid still exists in ALL_POKEMON
+    const validUids = new Set(ALL_POKEMON.map(p => p.uid));
+    for (const [uid, area] of Object.entries(saved)) {
+      if (validUids.has(uid) && AREAS.some(a => a.key === area)) {
+        pokemonLocation[uid] = area;
+      }
+    }
+  } catch(e) { console.warn('Could not load locations:', e); }
+}
 
 // ── SPRITE CONFIG ──
-// To switch sprite source, change SPRITE_SOURCE below:
-//   'pokeapi'  → https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{id}.png
-//   'serebii'  → https://www.serebii.net/pokemonpokopia/pokemon/{id}.png
-//   'artwork'  → https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{id}.png
 const SPRITE_SOURCE = 'serebii';
 
 function spriteUrl(p) {
-  // Accept either a pokemon object (preferred) or raw natId for backwards compat
   const idStr = (p && p.natId) ? p.natId : (p ? String(p) : null);
-  const idNum = (p && p.natId)    ? p.natId    : (p ? p : null);
-  const UniqueURL = UNIQUE_FORMS.find(pkmn => pkmn.name === p.name)?.urlStr || '';
-
-  if(!idStr && !idNum) return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/0.png';
-  if(SPRITE_SOURCE === 'serebii') {
-    if(UniqueURL !== '') {
-      if (p.natId < 10) return `https://www.serebii.net/pokemonpokopia/pokemon/small/00${idStr}${UniqueURL}.png`;
-      else if (p.natId < 100) return `https://www.serebii.net/pokemonpokopia/pokemon/small/0${idStr}${UniqueURL}.png`;
-      return `https://www.serebii.net/pokemonpokopia/pokemon/small/${idStr}${UniqueURL}.png`;
-    }
-    if (p.natId < 10) return `https://www.serebii.net/pokemonpokopia/pokemon/small/00${idStr}.png`;
-    else if (p.natId < 100) return `https://www.serebii.net/pokemonpokopia/pokemon/small/0${idStr}.png`;
-    return `https://www.serebii.net/pokemonpokopia/pokemon/small/${idStr}.png`;
-  } else if(SPRITE_SOURCE === 'artwork') {
+  const idNum = (p && p.natId) ? p.natId : (p ? p : null);
+  const uniqueEntry = UNIQUE_FORMS.find(pkmn => pkmn.name === p.name);
+  const uStr = uniqueEntry ? uniqueEntry.urlStr : '';
+  if (!idStr && !idNum) return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/0.png';
+  if (SPRITE_SOURCE === 'serebii') {
+    const pad = idNum < 10 ? '00' : idNum < 100 ? '0' : '';
+    return `https://www.serebii.net/pokemonpokopia/pokemon/small/${pad}${idStr}${uStr}.png`;
+  } else if (SPRITE_SOURCE === 'artwork') {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${idNum}.png`;
-  } else {
-    // pokeapi default
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${idNum}.png`;
   }
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${idNum}.png`;
 }
 
+const HABITAT_SPRITE_SOURCE = 'serebii';
+function habitatSpriteUrl(habId) {
+  if (!habId || HABITAT_SPRITE_SOURCE === 'none') return null;
+  return `https://www.serebii.net/pokemonpokopia/habitatdex/${habId}.png`;
+}
+
+// ── HELPERS ──
+function specImgUrl(s) {
+  return `https://www.serebii.net/pokemonpokopia/pokedex/specialty/${s.toLowerCase().replace(/\s+/g,'-')}.png`;
+}
+function specTagHTML(s) {
+  return `<span class="spec-tag" title="${s}"><img src="${specImgUrl(s)}" alt="${s}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle" onerror="this.replaceWith(document.createTextNode('${SPEC_EMOJI[s]||'?'}'))"> ${s}</span>`;
+}
+function rarityHTML(r) {
+  const count = r==='Very Rare'?3:r==='Rare'?2:r?1:0;
+  let h='<span class="rarity-stars">';
+  for(let i=1;i<=3;i++) h+=`<span class="${i<=count?'star-lit':'star-dim'}">★</span>`;
+  return h+'</span>';
+}
 function timeIcons(t) {
   if(!t) return '';
   const m={'Morning':'🌅','Day':'☀️','Evening':'🌆','Night':'🌙'};
   return t.split(',').map(x=>m[x.trim()]||'').join('');
 }
-
 function weatherIcons(w) {
   if(!w) return '';
   const m={'Sun':'☀️','Cloud':'☁️','Rain':'🌧️'};
   return w.split(',').map(x=>m[x.trim()]||'').join('');
 }
-
 function areaByKey(key) { return AREAS.find(a=>a.key===key); }
 
 // ── TOAST ──
 let toastTimer;
-function showToast(msg, dur=2800) {
+function showToast(msg, dur=2600) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
@@ -389,12 +491,21 @@ function showToast(msg, dur=2800) {
   toastTimer = setTimeout(()=>el.classList.remove('show'), dur);
 }
 
+// ── CONFIRM DIALOG ──
+function showConfirm(msg, onOk) {
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-ok-btn').onclick = () => { closeConfirm(); onOk(); };
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+}
+
 // ── TABS ──
 function switchTab(tab) {
-  ['pokemon','habitats','areas'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display = t===tab?'':'none';
-    const btn=document.querySelector(`[data-tab="${t}"]`);
-    if(btn) btn.classList.toggle('active',t===tab);
+  ['pokemon','habitats','areas'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? '' : 'none';
+    document.querySelector(`[data-tab="${t}"]`)?.classList.toggle('active', t===tab);
   });
   if(tab==='habitats') renderHabitats();
   if(tab==='areas') renderAreas();
@@ -403,22 +514,34 @@ function switchTab(tab) {
 
 // ── SORT / FILTERS ──
 function setSort(s) {
-  activeSort=s;
-  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sort-'+s).classList.add('active');
+  activeSort = s;
+  document.getElementById('sort-id').classList.toggle('active', s==='id');
+  document.getElementById('sort-name').classList.toggle('active', s==='name');
   renderPokemon();
 }
 function setHabSort(s) {
-  activeHabSort=s;
+  activeHabSort = s;
   document.getElementById('hab-sort-id').classList.toggle('active', s==='id');
   document.getElementById('hab-sort-name').classList.toggle('active', s==='name');
   renderHabitats();
 }
-function toggleFilter(arr,val,el) {
-  const i=arr.indexOf(val);
+function toggleFilter(arr, val, el) {
+  const i = arr.indexOf(val);
   if(i===-1) arr.push(val); else arr.splice(i,1);
-  el.classList.toggle('active',arr.includes(val));
+  el.classList.toggle('active', arr.includes(val));
   renderPokemon();
+}
+
+// ── SPECIALTY COLLAPSE ──
+function toggleSpecCollapse() {
+  specCollapsed = !specCollapsed;
+  const wrap = document.getElementById('spec-filters');
+  wrap.classList.toggle('collapsed', specCollapsed);
+  document.getElementById('spec-toggle-btn').textContent = specCollapsed ? 'Specialty ▾' : 'Specialty ▴';
+  setTimeout(() => {
+    const height = wrap.offsetHeight;
+    document.documentElement.style.setProperty('--spec-h', height + 'px');
+  }, 0);
 }
 
 // ── THEME PICKER ──
@@ -446,9 +569,6 @@ const THEMES = [
     { id: 'dragon',   bg: '#0f0f1f', accent: '#7038f8', order:16},
     { id: 'steel',    bg: '#1a1c1e', accent: '#b8b8d0', order:9},
 ];
-function initThemePicker() {
-    const container = document.getElementById('theme-picker-popup');
-    if (!container) return;
 
     container.innerHTML = THEMES.map(theme => `
         <div class="theme-option" data-theme="${theme.id}" onclick="setTheme('${theme.id}')">
@@ -457,50 +577,39 @@ function initThemePicker() {
         </div>
     `).join('');
 }
+
 function toggleThemePicker() {
-  document.getElementById('theme-picker-popup').classList.toggle('open');
+  // All theme popups share one element — position it correctly
+  const popup = document.getElementById('theme-picker-popup');
+  popup.classList.toggle('open');
 }
 
 function setTheme(themeId) {
-    // Remove all theme classes
-    THEMES.forEach(t => document.body.classList.remove('theme-' + t.id));
-    // Add new class (skip for 'normal' which is the :root default)
-    if (themeId !== 'normal') document.body.classList.add('theme-' + themeId);
-    currentTheme = themeId;
-    // Update UI selected state
-    document.querySelectorAll('.theme-option').forEach(el => {
-        el.classList.toggle('selected', el.dataset.theme === themeId);
-    });
-    localStorage.setItem('pokopia-theme', themeId);
-
+  THEMES.forEach(t => document.body.classList.remove('theme-'+t.id));
+  if(themeId !== 'normal') document.body.classList.add('theme-'+themeId);
+  currentTheme = themeId;
+  document.querySelectorAll('.theme-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.theme === themeId);
+  });
+  localStorage.setItem('pokopia-theme', themeId);
+  // NOTE: intentionally NOT closing picker on selection per user request
 }
 
-// Restore saved theme + wire outside-click close after DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-  initThemePicker();
-  const saved = localStorage.getItem('pokopia-theme');
-  if(saved) setTheme(saved);
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    const value = localStorage.getItem(key);
-    if (key !== 'pokopia-theme'){
-      pokemonLocation[key] = value;
-  }
-  renderPokemon();
-}
-});
+// Close theme picker on outside click
 document.addEventListener('click', e => {
-  const wrap = document.getElementById('theme-picker-wrap');
-  if(wrap && !wrap.contains(e.target)) {
-    const popup = document.getElementById('theme-picker-popup');
+  const popup = document.getElementById('theme-picker-popup');
+  // Close if click is outside any theme-picker-wrap
+  if(!e.target.closest('.theme-picker-wrap')) {
     if(popup) popup.classList.remove('open');
   }
 });
+
 // ── QUICK ADD ──
 function toggleQuickAdd() {
   qaActive = !qaActive;
-  document.getElementById('quick-add-bar').classList.toggle('hidden',!qaActive);
-  document.getElementById('qa-toggle-btn').style.background = qaActive ? 'var(--accent2)33' : '';
+  document.getElementById('quick-add-bar').classList.toggle('hidden', !qaActive);
+  document.getElementById('qa-toggle-btn').style.background = qaActive ? 'color-mix(in srgb,var(--accent2) 25%,transparent)' : '';
+  document.body.classList.toggle('qa-open', qaActive);
   if(!qaActive) {
     qaTarget = null;
     document.querySelectorAll('.qa-area-btn').forEach(b=>b.classList.remove('active'));
@@ -508,46 +617,47 @@ function toggleQuickAdd() {
 }
 
 function setQAArea(key) {
-  // toggle off if same
-  if(qaTarget===key) {
-    qaTarget=null;
-    document.querySelectorAll('.qa-area-btn').forEach(b=>b.classList.remove('active'));
-    return;
-  }
-  qaTarget=key;
+  if(qaTarget===key) { qaTarget=null; document.querySelectorAll('.qa-area-btn').forEach(b=>b.classList.remove('active')); return; }
+  qaTarget = key;
   document.querySelectorAll('.qa-area-btn').forEach(b=>b.classList.remove('active'));
-  // find the right button
-  if(key==='wild') {
-    document.getElementById('qa-wild').classList.add('active');
-  } else {
-    const area = AREAS.find(a=>a.key===key);
-    if(area) document.getElementById(area.qaId).classList.add('active');
-  }
+  if(key==='wild') document.getElementById('qa-wild').classList.add('active');
+  else { const a=AREAS.find(a=>a.key===key); if(a) document.getElementById(a.qaId).classList.add('active'); }
 }
 
-// ── CARD CLICK HANDLER ──
+function confirmReturnAllToWild() {
+  const count = Object.values(pokemonLocation).filter(v=>v).length;
+  if(count===0) { showToast('No Pokémon are currently placed in any area.'); return; }
+  showConfirm(
+    `Return all ${count} Pokémon to the wild? This cannot be undone.`,
+    () => {
+      for(const uid of Object.keys(pokemonLocation)) delete pokemonLocation[uid];
+      saveLocations();
+      renderPokemon();
+      if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
+      showToast(`🌿 ${count} Pokémon returned to the wild`);
+    }
+  );
+}
+
+// ── CARD CLICK ──
 function handleCardClick(uid) {
   const p = ALL_POKEMON.find(x=>x.uid===uid);
   if(!p) return;
-
   if(qaActive && qaTarget) {
-    // Quick Add mode
     if(qaTarget==='wild') {
-      pokemonLocation[uid]=null;
+      delete pokemonLocation[uid];
+      saveLocations();
       renderPokemon();
       if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
       showToast(`${p.name} released to the wild 🌿`);
     } else {
-      const curLoc = pokemonLocation[uid];
-      if(curLoc===qaTarget) {
-        showToast(`${p.name} is already in ${qaTarget}!`);
-        return;
-      }
-      pokemonLocation[uid]=qaTarget;
+      if(pokemonLocation[uid]===qaTarget) { showToast(`${p.name} is already in ${qaTarget}!`); return; }
+      pokemonLocation[uid] = qaTarget;
+      saveLocations();
       renderPokemon();
       if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
-      const area=areaByKey(qaTarget);
-      showToast(`${p.name} → ${area?area.icon:''} ${qaTarget}`);
+      const a = areaByKey(qaTarget);
+      showToast(`${p.name} → ${a?a.icon:''} ${qaTarget}`);
     }
   } else {
     openPkModal(uid);
@@ -564,7 +674,7 @@ function pkCardHTML(p, clickable=true) {
   const typeBadges = p.types.map(t=>`<span class="type-badge" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`).join('');
   const specs = p.specialties.map(s=>specTagHTML(s)).join('');
   const isPokopiaUnique = POKOPIA_UNIQUE.has(p.name);
-  const isPrimary = loc && p.primaryLocation && loc === p.primaryLocation;
+  const isPrimary = loc && p.primaryLocation && loc===p.primaryLocation;
   return `<div class="pk-card${inArea?' in-area':''}" data-uid="${p.uid}" ${onclick}>
     ${inArea?`<span class="area-badge">${areaLabel}</span>`:''}
     ${isPokopiaUnique?`<span class="pokopia-badge">✦ Pokopia</span>`:''}
@@ -581,59 +691,35 @@ function pkCardHTML(p, clickable=true) {
 // ── RENDER POKEMON ──
 function renderPokemon() {
   const q = document.getElementById('pk-search').value.toLowerCase();
-  let data = ALL_POKEMON.filter(p=>{
+  let data = ALL_POKEMON.filter(p => {
     if(q && !p.name.toLowerCase().includes(q)) return false;
     if(activeSpecFilters.length && !activeSpecFilters.some(s=>p.specialties.includes(s))) return false;
-   /* DISABLED: Time and Weather Filters
-      if(activeTimeFilters.length) {
-      // Exclusive: pokemon must appear ONLY in the selected times (exact subset match)
-      const pt=(p.time||'').split(',').map(x=>x.trim()).filter(Boolean);
-      // pt must be a subset of activeTimeFilters — every pt entry must be selected
-      if(!pt.length || !pt.every(t=>activeTimeFilters.includes(t))) return false;
-    }
-    if(activeWeatherFilters.length) {
-      // Exclusive: pokemon must appear ONLY in the selected weather
-      const pw=(p.weather||'').split(',').map(x=>x.trim()).filter(Boolean);
-      if(!pw.length || !pw.every(w=>activeWeatherFilters.includes(w))) return false;
-    }*/
     return true;
   });
   if(activeSort==='id') data.sort((a,b)=>a.pokopiaId-b.pokopiaId||a.name.localeCompare(b.name));
   else data.sort((a,b)=>a.name.localeCompare(b.name));
-  document.getElementById('pokemon-grid').innerHTML=data.map(p=>pkCardHTML(p)).join('');
-}
-
-// ── HABITAT SPRITE CONFIG ──
-// To switch habitat sprite source, change HABITAT_SPRITE_SOURCE:
-//   'serebii'   → https://www.serebii.net/pokemonpokopia/habitatdex/{id}.png
-//   'none'      → no image, show emoji placeholder only
-const HABITAT_SPRITE_SOURCE = 'serebii';
-
-function habitatSpriteUrl(habId) {
-  if(!habId || HABITAT_SPRITE_SOURCE === 'none') return null;
-  return `https://www.serebii.net/pokemonpokopia/habitatdex/${habId}.png`;
+  document.getElementById('pokemon-grid').innerHTML = data.map(p=>pkCardHTML(p)).join('');
 }
 
 // ── HABITATS INDEX ──
-// Build from pokemon data, then enrich with id/description from ALL_HABITATS
 function buildHabitatIndex() {
-  const idx={};
-  ALL_POKEMON.forEach(p=>{
-    p.habitats.forEach(h=>{
+  const idx = {};
+  ALL_POKEMON.forEach(p => {
+    p.habitats.forEach(h => {
       if(!idx[h.name]) idx[h.name]={name:h.name,pokemon:[],meta:h,habitatId:h.habitatId||null};
       if(!idx[h.name].pokemon.find(x=>x.uid===p.uid)) idx[h.name].pokemon.push(p);
-      // pick up habitatId from first pokemon that has it
       if(h.habitatId && !idx[h.name].habitatId) idx[h.name].habitatId = h.habitatId;
     });
   });
-  // Enrich with description from ALL_HABITATS
   const habLookup = {};
   if(typeof ALL_HABITATS !== 'undefined') {
-    ALL_HABITATS.forEach(h => { habLookup[h.id] = h; habLookup[h.name] = h; });
+    ALL_HABITATS.forEach(h => { habLookup[h.id]=h; habLookup[h.name]=h; });
   }
-  return Object.values(idx).sort((a,b)=>a.name.localeCompare(b.name)).map(h=>{
+  return Object.values(idx).sort((a,b)=>a.name.localeCompare(b.name)).map(h => {
     const master = habLookup[h.habitatId] || habLookup[h.name] || {};
     h.description = master.description || null;
+    h.requirements = master.requirements || [];
+    h.conditions   = master.conditions   || [];
     h.habitatId = h.habitatId || master.id || null;
     return h;
   });
@@ -641,21 +727,20 @@ function buildHabitatIndex() {
 const HABITAT_INDEX = buildHabitatIndex();
 
 function renderHabitats() {
-  const q=document.getElementById('hab-search').value.toLowerCase();
+  const q = document.getElementById('hab-search').value.toLowerCase();
   let list = q ? HABITAT_INDEX.filter(h=>h.name.toLowerCase().includes(q)) : [...HABITAT_INDEX];
   if(activeHabSort==='id') list.sort((a,b)=>(a.habitatId||999)-(b.habitatId||999));
   else list.sort((a,b)=>a.name.localeCompare(b.name));
-  document.getElementById('habitats-grid').innerHTML=list.map(h=>{
+  document.getElementById('habitats-grid').innerHTML = list.map(h => {
     const sprUrl = habitatSpriteUrl(h.habitatId);
     const imgHtml = sprUrl
       ? `<img class="hab-img" src="${sprUrl}" alt="${h.name}" loading="lazy" onerror="this.style.display='none'">`
       : `<div style="font-size:2rem;text-align:center;margin-bottom:5px">🏡</div>`;
-    const sprites=h.pokemon.slice(0,8).map(p=>`<img src="${spriteUrl(p)}" alt="${p.name}" title="${p.name}" loading="lazy">`).join('');
-    const more=h.pokemon.length>8?`<span style="font-size:0.65rem;opacity:0.55">+${h.pokemon.length-8}</span>`:'';
+    const sprites = h.pokemon.slice(0,8).map(p=>`<img src="${spriteUrl(p)}" alt="${p.name}" title="${p.name}" loading="lazy">`).join('');
+    const more = h.pokemon.length>8 ? `<span style="font-size:0.62rem;opacity:0.55">+${h.pokemon.length-8}</span>` : '';
     const idLabel = h.habitatId ? `<div class="hab-id">#${h.habitatId}</div>` : '';
-    return `<div class="hab-card" onclick="openHabModal('${(h.name.replace(/'/g, "\\'"))}')">
-      ${idLabel}
-      ${imgHtml}
+    return `<div class="hab-card" onclick="openHabModal('${h.name.replace(/'/g,"\\'")}')">
+      ${idLabel}${imgHtml}
       <div class="hab-name">${h.name}</div>
       <div class="hab-pokemon">${sprites}${more}</div>
     </div>`;
@@ -664,41 +749,50 @@ function renderHabitats() {
 
 // ── AREAS ──
 function renderAreas() {
-  document.getElementById('areas-container').innerHTML=AREAS.map(area=>{
-    const pks=ALL_POKEMON.filter(p=>pokemonLocation[p.uid]===area.key);
-    const wasOpen=document.getElementById(`area-body-${area.key.replace(/\s/g,'-')}`)?.classList.contains('open');
-    const bid='area-body-'+area.key.replace(/\s/g,'-');
-    const cid='area-chev-'+area.key.replace(/\s/g,'-');
+  const q = (document.getElementById('area-search')?.value || '').toLowerCase();
+  document.getElementById('areas-container').innerHTML = AREAS.map(area => {
+    let pks = ALL_POKEMON.filter(p=>pokemonLocation[p.uid]===area.key);
+    // Filter by search
+    const filteredPks = q ? pks.filter(p=>p.name.toLowerCase().includes(q)) : pks;
+    // Expand if has matching pokemon, or has any pokemon and no search
+    const shouldOpen = q ? filteredPks.length > 0 : pks.length > 0;
+    const bid = 'area-body-'+area.key.replace(/\s/g,'-');
+    const cid = 'area-chev-'+area.key.replace(/\s/g,'-');
+    // Respect manual toggle state if no search; auto-expand on search match
+    const wasOpen = document.getElementById(bid)?.classList.contains('open');
+    const isOpen = q ? shouldOpen : (wasOpen !== undefined ? wasOpen : shouldOpen);
     return `<div class="area-section">
       <div class="area-header" onclick="toggleArea('${bid}','${cid}')">
         <div class="area-title">${area.icon} ${area.name}<span class="area-count">${pks.length} Pokémon</span></div>
-        <span class="area-chev${wasOpen?' open':''}" id="${cid}">▼</span>
+        <span class="area-chev${isOpen?' open':''}" id="${cid}">▼</span>
       </div>
-      <div class="area-body${wasOpen?' open':''}" id="${bid}">
-        ${pks.length===0
-          ?'<div class="area-empty">No Pokémon assigned yet.<br>Use Quick Add or tap a Pokémon card.</div>'
-          :`<div class="area-pg">${pks.map(p=>pkCardHTML(p)).join('')}</div>`}
+      <div class="area-body${isOpen?' open':''}" id="${bid}">
+        ${filteredPks.length===0
+          ? (q ? '<div class="area-empty">No matches in this area.</div>' : '<div class="area-empty">No Pokémon assigned yet.<br>Use Quick Add or tap a card.</div>')
+          : `<div class="area-pg">${filteredPks.map(p=>pkCardHTML(p)).join('')}</div>`}
       </div>
     </div>`;
   }).join('');
 }
 
-function toggleArea(bid,cid) {
+function toggleArea(bid, cid) {
   document.getElementById(bid).classList.toggle('open');
   document.getElementById(cid).classList.toggle('open');
 }
 
 // ── POKEMON MODAL ──
 function openPkModal(uid) {
-  const p=ALL_POKEMON.find(x=>x.uid===uid);
+  const p = ALL_POKEMON.find(x=>x.uid===uid);
   if(!p) return;
-  const loc=pokemonLocation[p.uid]??null;
-  const typeBadges=p.types.map(t=>`<span class="type-badge" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`).join('');
-  const specs=p.specialties.map(s=>specTagHTML(s)).join('');
-  const habCards=p.habitats.map(h=>{
+  const loc = pokemonLocation[p.uid] ?? null;
+  const typeBadges = p.types.map(t=>`<span class="type-badge" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`).join('');
+  const specs = p.specialties.map(s=>specTagHTML(s)).join('');
+  const habCards = p.habitats.map(h => {
     const hSpr = habitatSpriteUrl(h.habitatId);
-    const hImg = hSpr ? `<img src="${hSpr}" alt="${h.name}" style="width:48px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0" loading="lazy" onerror="this.style.display='none'">` : `<span style="font-size:1.4rem">🏡</span>`;
-    return `<div class="modal-hab-card" onclick="openHabFromPkModal('${(h.name.replace(/'/g, "\\'"))}')">
+    const hImg = hSpr
+      ? `<img src="${hSpr}" alt="${h.name}" style="width:48px;height:36px;object-fit:cover;border-radius:4px;flex-shrink:0" loading="lazy" onerror="this.style.display='none'">`
+      : `<span style="font-size:1.4rem">🏡</span>`;
+    return `<div class="modal-hab-card" onclick="openHabFromPkModal('${h.name.replace(/'/g,"\\'")}')">
       <div style="display:flex;align-items:center;gap:8px">
         ${hImg}
         <div>
@@ -712,19 +806,16 @@ function openPkModal(uid) {
       </div>
     </div>`;
   }).join('');
-  const favChips=p.favorites.map(f=>`<span class="chip">${f}</span>`).join('');
-  const curLocHTML=loc
-    ?`<div class="cur-loc"><span class="loc-dot" style="background:var(--accent2)"></span><span>In <strong>${loc}</strong></span></div>`
-    :`<div class="cur-loc"><span class="loc-dot" style="background:var(--text-dim)"></span><span>In the Wild</span></div>`;
-  // Area buttons — mark current area AND primary location
-  const areaBtns=AREAS.map(a=>{
+  const favChips = p.favorites.map(f=>`<span class="chip">${f}</span>`).join('');
+  const curLocHTML = loc
+    ? `<div class="cur-loc"><span class="loc-dot" style="background:var(--accent2)"></span><span>In <strong>${loc}</strong></span></div>`
+    : `<div class="cur-loc"><span class="loc-dot" style="background:var(--text-dim)"></span><span>In the Wild</span></div>`;
+  const areaBtns = AREAS.map(a => {
     const isCurrent = loc===a.key;
     const isPrimary = p.primaryLocation===a.key;
-    const starLabel = isPrimary ? ' ⭐' : '';
-    return `<button class="area-pick-btn${isCurrent?' current-area':''}" onclick="assignToArea('${uid}','${a.key}')">${a.icon} ${a.name}${starLabel}</button>`;
+    return `<button class="area-pick-btn${isCurrent?' current-area':''}" onclick="assignToArea('${uid}','${a.key}')">${a.icon} ${a.name}${isPrimary?' ⭐':''}</button>`;
   }).join('');
-  const relBtn=loc?`<button class="release-btn" onclick="releaseToWild('${uid}')">🌿 Release to Wild</button>`:'';
-  // Details rows — no emoji prefix for labels, rarity as stars
+  const relBtn = loc ? `<button class="release-btn" onclick="releaseToWild('${uid}')">🌿 Release to Wild</button>` : '';
   const detailRows = [
     `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Primary Location</span><span><strong>${p.primaryLocation||'?'}</strong></span></div>`,
     `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="opacity:0.55">Active Time</span><span><strong>${p.time||'?'}</strong></span></div>`,
@@ -743,10 +834,7 @@ function openPkModal(uid) {
       </div>
     </div>
     <div class="modal-body">
-      <div class="modal-sec">
-        <h3>Details</h3>
-        <div style="font-size:0.8rem">${detailRows}</div>
-      </div>
+      <div class="modal-sec"><h3>Details</h3><div style="font-size:0.8rem">${detailRows}</div></div>
       ${favChips?`<div class="modal-sec"><h3>Favorites</h3><div class="chips">${favChips}</div></div>`:''}
       ${habCards?`<div class="modal-sec"><h3>Where to Find</h3>${habCards}</div>`:''}
       <div class="modal-sec">
@@ -763,92 +851,103 @@ function openPkModal(uid) {
 }
 
 function closePkModal(e) {
-  if(!e||e.target===document.getElementById('pk-modal')) document.getElementById('pk-modal').classList.remove('open');
+  if(!e || e.target===document.getElementById('pk-modal')) document.getElementById('pk-modal').classList.remove('open');
 }
-
-function openHabFromPkModal(enc) {
+function openHabFromPkModal(name) {
   closePkModal();
-  setTimeout(()=>{switchTab('habitats');openHabModal(enc);},80);
+  setTimeout(()=>{ switchTab('habitats'); openHabModal(name); }, 80);
 }
-
-function assignToArea(uid,areaKey) {
-  pokemonLocation[uid]=areaKey;
-  localStorage.setItem(uid,areaKey)
+function assignToArea(uid, areaKey) {
+  pokemonLocation[uid] = areaKey;
+  saveLocations();
   openPkModal(uid);
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
 }
-
 function releaseToWild(uid) {
   delete pokemonLocation[uid];
-  localStorage.removeItem(uid); 
+  saveLocations();
   openPkModal(uid);
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
 }
 
 // ── HABITAT MODAL ──
-function openHabModal(enc) {
-  const name=decodeURIComponent(enc);
-  const hab=HABITAT_INDEX.find(h=>h.name===name);
+function openHabModal(name) {
+  // Accept raw name or encoded name
+  const decodedName = name.includes('%') ? decodeURIComponent(name) : name;
+  const hab = HABITAT_INDEX.find(h=>h.name===decodedName);
   if(!hab) return;
-  const pkChips=hab.pokemon.map(p=>`
+  const pkChips = hab.pokemon.map(p=>`
     <div class="hab-poke-chip" onclick="closeHabModal();setTimeout(()=>{switchTab('pokemon');openPkModal('${p.uid}');},80)">
       <img src="${spriteUrl(p)}" alt="${p.name}">
       <span>#${String(p.pokopiaId).padStart(3,'0')} ${p.name}</span>
     </div>`).join('');
   const sprUrl = habitatSpriteUrl(hab.habitatId);
   const imgHtml = sprUrl
-    ? `<img src="${sprUrl}" alt="${name}" style="width:100%;height:fit-content;object-fit:cover;border-radius:0 0 8px 8px;display:block" loading="lazy" onerror="this.style.display='none'">`
+    ? `<img src="${sprUrl}" alt="${decodedName}" style="width:100%;height:fit-content;object-fit:cover;border-radius:0 0 8px 8px;display:block" loading="lazy" onerror="this.style.display='none'">`
     : '';
   const idStr = hab.habitatId ? `<div style="font-size:0.65rem;opacity:0.45;font-family:monospace;text-align:center">#${hab.habitatId}</div>` : '';
+
+  // Requirements section
+  const reqHTML = hab.requirements && hab.requirements.length
+    ? `<div class="modal-sec"><h3>Requirements</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${hab.requirements.map(r=>`<span class="condition-chip">${r.item} <span class="condition-qty">${r.qty}</span></span>`).join('')}
+        </div></div>`
+    : '';
+
+  // Conditions section (new field)
+  const condHTML = hab.conditions && hab.conditions.length
+    ? `<div class="modal-sec"><h3>Conditions</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${hab.conditions.map(c=>`<span class="condition-chip">${c}</span>`).join('')}
+        </div></div>`
+    : '';
+
   document.getElementById('hab-modal-inner').innerHTML=`
     <button class="modal-close" onclick="closeHabModal()">✕</button>
     <div class="modal-hdr" style="flex-direction:column;align-items:center;text-align:center;gap:4px;padding:14px 14px 0;border-radius:14px 14px 0 0">
       ${idStr}
-      <h2 style="font-size:0.95rem">${name}</h2>
-      ${hab.description ? `<p style="font-size:0.75rem;opacity:0.65;line-height:1.4;margin-top:2px;font-style:italic;padding:0 8px">${hab.description}</p>` : ''}
+      <h2 style="font-size:0.95rem">${decodedName}</h2>
+      ${hab.description?`<p style="font-size:0.75rem;opacity:0.65;line-height:1.4;margin-top:2px;font-style:italic;padding:0 8px">${hab.description}</p>`:''}
     </div>
     ${imgHtml}
     <div class="modal-body">
+      ${reqHTML}
+      ${condHTML}
       <div class="modal-sec"><h3>Pokémon Found in this Habitat (${hab.pokemon.length})</h3><div class="hab-poke-mini">${pkChips}</div></div>
     </div>`;
   document.getElementById('hab-modal').classList.add('open');
 }
 
 function closeHabModal(e) {
-  if(!e||e.target===document.getElementById('hab-modal')) document.getElementById('hab-modal').classList.remove('open');
+  if(!e || e.target===document.getElementById('hab-modal')) document.getElementById('hab-modal').classList.remove('open');
 }
 
 // ── INIT FILTERS ──
 function initFilters() {
-  const allSpecs=[...new Set(ALL_POKEMON.flatMap(p=>p.specialties))].sort();
-  const specC=document.getElementById('spec-filters');
-  allSpecs.forEach(s=>{
-    const b=document.createElement('button');b.className='filter-pill';
-    b.innerHTML=`<img src="${specImgUrl(s)}" alt="${s}" style="width:12px;height:12px;vertical-align:middle;margin-right:2px" onerror="this.replaceWith(document.createTextNode('${SPEC_EMOJI[s]||'?'}'))"> ${s}`;
-    b.onclick=()=>toggleFilter(activeSpecFilters,s,b);
+  const allSpecs = [...new Set(ALL_POKEMON.flatMap(p=>p.specialties))].sort();
+  const specC = document.getElementById('spec-filters');
+  allSpecs.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'filter-pill';
+    b.innerHTML = `<img src="${specImgUrl(s)}" alt="${s}" style="width:12px;height:12px;vertical-align:middle;margin-right:2px" onerror="this.replaceWith(document.createTextNode('${SPEC_EMOJI[s]||'?'}'))"> ${s}`;
+    b.onclick = () => toggleFilter(activeSpecFilters, s, b);
     specC.appendChild(b);
   });
-  /* DISABLED: Time and Weather Filters
-  const times=['Morning','Day','Evening','Night'];
-  const tIcons={'Morning':'🌅','Day':'☀️','Evening':'🌆','Night':'🌙'};
-  const tC=document.getElementById('time-filters');
-  times.forEach(t=>{
-    const b=document.createElement('button');b.className='filter-pill';
-    b.innerHTML=`${tIcons[t]} ${t}`;b.onclick=()=>toggleFilter(activeTimeFilters,t,b);tC.appendChild(b);
-  });
-  const weathers=['Sun','Cloud','Rain'];
-  const wIcons={'Sun':'☀️','Cloud':'☁️','Rain':'🌧️'};
-  const wC=document.getElementById('weather-filters');
-  weathers.forEach(w=>{
-    const b=document.createElement('button');b.className='filter-pill';
-    b.innerHTML=`${wIcons[w]} ${w}`;b.onclick=()=>toggleFilter(activeWeatherFilters,w,b);wC.appendChild(b);
-  });
-  */
 }
 
-initFilters();
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded', () => {
+  initThemePicker();
+  const savedTheme = localStorage.getItem('pokopia-theme');
+  if(savedTheme) setTheme(savedTheme);
+
+  loadLocations();
+  initFilters();
+  renderPokemon();
+});
 
 </script>
 </body>
