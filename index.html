@@ -179,6 +179,67 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:500;align-items:center;justify-content:center;padding:14px}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:470px;width:100%;max-height:88vh;overflow-y:auto;position:relative}
+
+/* ── MOBILE LAYOUT ── */
+@media(max-width:600px){
+  /* Modal: sit at bottom of screen like a sheet, full width, taller */
+  .modal-overlay{
+    align-items:flex-end;
+    padding:0;
+  }
+  .modal{
+    max-width:100%;
+    width:100%;
+    max-height:82vh;         /* leave room for phone status bar + tabs */
+    border-radius:16px 16px 0 0;
+    border-bottom:none;
+  }
+
+  /* Controls bar: allow wrap so Quick Add button doesn't get cut off */
+  .controls-bar{
+    flex-wrap:wrap;
+    gap:5px;
+    padding:5px 8px;
+    min-height:unset;
+  }
+
+  /* Let search input grow to fill the row it's on */
+  .controls-bar input[type=text]{
+    width:auto;
+    flex:1 1 120px;
+    min-width:100px;
+  }
+
+  /* Quick Add toggle: push to its own row when it wraps */
+  #qa-toggle-btn{
+    order:10;          /* sort it last so it wraps to next line cleanly */
+    margin-left:auto;
+  }
+
+  /* Specialty collapse button: don't shrink weirdly */
+  .spec-collapse-btn{
+    flex-shrink:0;
+  }
+
+  /* Quick add bar: allow buttons to wrap to second line */
+  .quick-add-bar{
+    flex-wrap:wrap;
+    gap:4px;
+    padding:5px 8px;
+  }
+
+  /* Slightly smaller qa buttons on mobile */
+  .qa-area-btn{
+    font-size:0.6rem;
+    padding:3px 8px;
+  }
+
+  /* Card grid: 2 columns on phone */
+  :root{ --card-min:148px; }
+
+  /* Toast: keep above bottom edge */
+  .toast{ bottom:20px; }
+}
 .modal-hdr{background:var(--surface2);padding:14px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:12px}
 .modal-hdr img{width:76px;height:76px;image-rendering:pixelated;flex-shrink:0}
 .modal-hdr-info h2{font-size:1.05rem;text-transform:capitalize;margin-bottom:3px}
@@ -644,13 +705,15 @@ function handleCardClick(uid) {
   if(!p) return;
   if(qaActive && qaTarget) {
     if(qaTarget==='wild') {
-      delete pokemonLocation[uid];
-      saveLocations();
-      renderPokemon();
-      if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
-      showToast(`${p.name} released to the wild 🌿`);
+      releaseToWild(p);
     } else {
-      if(pokemonLocation[uid]===qaTarget) { showToast(`${p.name} is already in ${qaTarget}!`); return; }
+      if(pokemonLocation[uid]===qaTarget) { 
+        // prevent user from adding to same area tiwce
+        //showToast(`${p.name} is already in ${qaTarget}!`); 
+        // let user de-select qa location if already there
+        releaseToWild(p);
+        return;
+      }
       pokemonLocation[uid] = qaTarget;
       saveLocations();
       renderPokemon();
@@ -748,6 +811,7 @@ function renderHabitats() {
 
 // ── AREAS ──
 function renderAreas() {
+  toggleQuickAdd();
   const q = (document.getElementById('area-search')?.value || '').toLowerCase();
   document.getElementById('areas-container').innerHTML = AREAS.map(area => {
     let pks = ALL_POKEMON.filter(p=>pokemonLocation[p.uid]===area.key);
@@ -863,12 +927,12 @@ function assignToArea(uid, areaKey) {
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
 }
-function releaseToWild(uid) {
-  delete pokemonLocation[uid];
+function releaseToWild(p) {
+  delete pokemonLocation[p.uid];
   saveLocations();
-  openPkModal(uid);
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
+  showToast(`${p.name} released to the wild 🌿`);
 }
 
 // ── HABITAT MODAL ──
