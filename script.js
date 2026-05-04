@@ -142,6 +142,7 @@ function switchTab(tab) {
     document.getElementById('tab-'+t).style.display = t===tab ? '' : 'none';
     document.querySelector(`[data-tab="${t}"]`)?.classList.toggle('active', t===tab);
   });
+  if(tab!=='pokemon') qaActive?toggleQuickAdd():null; // auto-disable quick add when leaving pokemon tab
   if(tab==='habitats') renderHabitats();
   if(tab==='areas') renderAreas();
   window.scrollTo(0, 0);
@@ -284,13 +285,13 @@ function handleCardClick(uid) {
   if(!p) return;
   if(qaActive && qaTarget) {
     if(qaTarget==='wild') {
-      releaseToWild(p);
+      releaseToWild(uid);
     } else {
       if(pokemonLocation[uid]===qaTarget) { 
         // prevent user from adding to same area tiwce
         //showToast(`${p.name} is already in ${qaTarget}!`); 
         // let user de-select qa location if already there
-        releaseToWild(p);
+        releaseToWild(uid);
         return;
       }
       pokemonLocation[uid] = qaTarget;
@@ -367,9 +368,21 @@ function buildHabitatIndex() {
 }
 const HABITAT_INDEX = buildHabitatIndex();
 
+// Pre-compute sorted list of all specialties for the insights panel
+const ALL_SPECIALTIES = [...new Set(ALL_POKEMON.flatMap(p => p.specialties))].sort();
+
 function renderHabitats() {
-  const q = document.getElementById('hab-search').value.toLowerCase();
-  let list = q ? HABITAT_INDEX.filter(h=>h.name.toLowerCase().includes(q)) : [...HABITAT_INDEX];
+  const q = document.getElementById('hab-search').value.toLowerCase().trim();
+  let list;
+  if (!q) {
+    list = [...HABITAT_INDEX];
+  } else {
+    // Match by habitat name OR by any pokemon name found in that habitat
+    list = HABITAT_INDEX.filter(h =>
+      h.name.toLowerCase().includes(q) ||
+      h.pokemon.some(p => p.name.toLowerCase().includes(q))
+    );
+  }
   if(activeHabSort==='id') list.sort((a,b)=>(a.habitatId||999)-(b.habitatId||999));
   else list.sort((a,b)=>a.name.localeCompare(b.name));
   document.getElementById('habitats-grid').innerHTML = list.map(h => {
@@ -389,29 +402,76 @@ function renderHabitats() {
 }
 
 // ── AREAS ──
+// Track which area insight panels are open (persists across re-renders)
+const areaInsightsOpen = {};
+
+function toggleAreaInsights(areaKey) {
+  areaInsightsOpen[areaKey] = !areaInsightsOpen[areaKey];
+  // Re-render just the insights panel for this area without full re-render
+  const panel = document.getElementById('insights-panel-' + areaKey.replace(/\s/g,'-'));
+  const btn   = document.getElementById('insights-btn-'   + areaKey.replace(/\s/g,'-'));
+  if (!panel || !btn) return;
+  if (areaInsightsOpen[areaKey]) {
+    panel.style.display = 'block';
+    btn.textContent = 'Hide Insights ▴';
+  } else {
+    panel.style.display = 'none';
+    btn.textContent = 'Show Insights ▾';
+  }
+}
+
+function renderAreaInsightsPanel(areaKey, pksInArea) {
+  // Build set of specialties present in this area
+  const presentSpecs = new Set(pksInArea.flatMap(p => p.specialties));
+  const isOpen = !!areaInsightsOpen[areaKey];
+  const safeKey = areaKey.replace(/\s/g,'-');
+
+  const pills = ALL_SPECIALTIES.map(s => {
+    const active = presentSpecs.has(s);
+    return `<span class="insight-pill${active ? ' active' : ''}" title="${s}">
+      <img src="${specImgUrl(s)}" alt="${s}"
+        style="width:11px;height:11px;object-fit:contain;vertical-align:middle;margin-right:2px"
+        onerror="this.replaceWith(document.createTextNode('${SPEC_EMOJI[s]||'?'}'))">
+      ${s}
+    </span>`;
+  }).join('');
+
+  return `
+    <div class="area-insights-bar">
+      <button class="area-insights-btn" id="insights-btn-${safeKey}"
+        onclick="toggleAreaInsights('${areaKey}')">
+        ${isOpen ? 'Hide Insights ▴' : 'Show Insights ▾'}
+      </button>
+    </div>
+    <div class="area-insights-panel" id="insights-panel-${safeKey}"
+      style="display:${isOpen ? 'block' : 'none'}">
+      <div class="area-insights-pills">${pills}</div>
+    </div>`;
+}
+
 function renderAreas() {
-  toggleQuickAdd();
   const q = (document.getElementById('area-search')?.value || '').toLowerCase();
   document.getElementById('areas-container').innerHTML = AREAS.map(area => {
-    let pks = ALL_POKEMON.filter(p=>pokemonLocation[p.uid]===area.key);
-    // Filter by search
-    const filteredPks = q ? pks.filter(p=>p.name.toLowerCase().includes(q)) : pks;
-    // Expand if has matching pokemon, or has any pokemon and no search
+    const pks = ALL_POKEMON.filter(p => pokemonLocation[p.uid] === area.key);
+    const filteredPks = q ? pks.filter(p => p.name.toLowerCase().includes(q)) : pks;
     const shouldOpen = q ? filteredPks.length > 0 : pks.length > 0;
-    const bid = 'area-body-'+area.key.replace(/\s/g,'-');
-    const cid = 'area-chev-'+area.key.replace(/\s/g,'-');
-    // Respect manual toggle state if no search; auto-expand on search match
+    const bid = 'area-body-' + area.key.replace(/\s/g,'-');
+    const cid = 'area-chev-' + area.key.replace(/\s/g,'-');
     const wasOpen = document.getElementById(bid)?.classList.contains('open');
     const isOpen = q ? shouldOpen : (wasOpen !== undefined ? wasOpen : shouldOpen);
+
     return `<div class="area-section">
       <div class="area-header" onclick="toggleArea('${bid}','${cid}')">
         <div class="area-title">${area.icon} ${area.name}<span class="area-count">${pks.length} Pokémon</span></div>
         <span class="area-chev${isOpen?' open':''}" id="${cid}">▼</span>
       </div>
       <div class="area-body${isOpen?' open':''}" id="${bid}">
-        ${filteredPks.length===0
-          ? (q ? '<div class="area-empty">No matches in this area.</div>' : '<div class="area-empty">No Pokémon assigned yet.<br>Use Quick Add or tap a card.</div>')
-          : `<div class="area-pg">${filteredPks.map(p=>pkCardHTML(p)).join('')}</div>`}
+        ${filteredPks.length === 0
+          ? (q
+              ? '<div class="area-empty">No matches in this area.</div>'
+              : '<div class="area-empty">No Pokémon assigned yet.<br>Use Quick Add or tap a card.</div>')
+          : `${renderAreaInsightsPanel(area.key, pks)}
+             <div class="area-pg">${filteredPks.map(p => pkCardHTML(p)).join('')}</div>`}
       </div>
     </div>`;
   }).join('');
@@ -497,7 +557,7 @@ function closePkModal(e) {
 }
 function openHabFromPkModal(name) {
   closePkModal();
-  setTimeout(()=>{ switchTab('habitats'); openHabModal(name); }, 80);
+  setTimeout(()=>{ openHabModal(name); }, 80);
 }
 function assignToArea(uid, areaKey) {
   pokemonLocation[uid] = areaKey;
@@ -506,12 +566,13 @@ function assignToArea(uid, areaKey) {
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
 }
-function releaseToWild(p) {
-  delete pokemonLocation[p.uid];
+function releaseToWild(uid) {
+  const p = ALL_POKEMON.find(x => x.uid === uid);
+  delete pokemonLocation[uid];
   saveLocations();
   renderPokemon();
   if(document.getElementById('tab-areas').style.display!=='none') renderAreas();
-  showToast(`${p.name} released to the wild 🌿`);
+  if(p) showToast(`${p.name} released to the wild 🌿`);
 }
 
 // ── HABITAT MODAL ──
@@ -521,7 +582,7 @@ function openHabModal(name) {
   const hab = HABITAT_INDEX.find(h=>h.name===decodedName);
   if(!hab) return;
   const pkChips = hab.pokemon.map(p=>`
-    <div class="hab-poke-chip" onclick="closeHabModal();setTimeout(()=>{switchTab('pokemon');openPkModal('${p.uid}');},80)">
+    <div class="hab-poke-chip" onclick="closeHabModal();setTimeout(()=>{openPkModal('${p.uid}');},80)">
       <img src="${spriteUrl(p)}" alt="${p.name}">
       <span>#${String(p.pokopiaId).padStart(3,'0')} ${p.name}</span>
     </div>`).join('');
