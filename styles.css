@@ -50,6 +50,7 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 .sort-btn{
   padding:4px 8px;border-radius:6px;border:1px solid var(--border);
   background:var(--surface2);color:var(--text-dim);font-size:0.65rem;font-weight:700;cursor:pointer;transition:0.13s;
+  flex-shrink:0; white-space:nowrap;
 }
 .sort-btn.active{background:var(--accent2);color:#000;border-color:var(--accent2)}
 .ctrl-spacer{flex:1}
@@ -225,24 +226,27 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
   }
 
   /* Controls bar: allow wrap so Quick Add button doesn't get cut off */
-  .controls-bar{
-    flex-wrap:wrap;
-    gap:5px;
-    padding:5px 8px;
-    min-height:unset;
+  .controls-bar {
+    flex-wrap: nowrap;        /* never wrap — keeps bar single-row */
+    overflow-x: auto;         /* scroll horizontally instead */
+    overflow-y: visible;      /* must be visible so sticky children below work */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;    /* hide scrollbar on Firefox */
+  }
+  .controls-bar::-webkit-scrollbar {
+    display: none;            /* hide scrollbar on Chrome/Safari */
   }
 
-  /* Let search input grow to fill the row it's on */
-  .controls-bar input[type=text]{
-    width:auto;
-    flex:1 1 120px;
-    min-width:100px;
+  /* Search input: don't let it flex-grow and push buttons off screen */
+  .controls-bar input[type=text] {
+    flex-shrink: 0;
+    width: 130px;             /* fixed small width, scrollable bar handles overflow */
   }
 
-  /* Quick Add toggle: push to its own row when it wraps */
-  #qa-toggle-btn{
-    order:10;          /* sort it last so it wraps to next line cleanly */
-    margin-left:auto;
+  /* Remove the order/margin-left:auto trick since we no longer wrap */
+  #qa-toggle-btn {
+    order: 0;
+    margin-left: 0;
   }
 
   /* Specialty collapse button: don't shrink weirdly */
