@@ -8,6 +8,7 @@ const AREAS = [
   {key:'Rocky Ridges',       name:'Rocky Ridges',       icon:'⛰️',qaId:'qa-rr'},
   {key:'Sparkling Skylands', name:'Sparkling Skylands', icon:'☁️',qaId:'qa-ss'},
   {key:'Palette Town',       name:'Palette Town',       icon:'🏘️',qaId:'qa-pt'},
+  {key:'Unregistered',       name:'(In the Wild)',          icon:'🌿',qaId:''},
 ];
 
 const POKOPIA_UNIQUE = new Set(['Peakychu','Mosslax','Professor Tangrowth','Smearguru (Smeargle)','Chef Dente (Greedent)','Tinkmaster (Tinkaton)']);
@@ -34,6 +35,7 @@ let activeSort = 'id';
 let activeHabSort = 'id';
 let activeSpecFilters = [];
 let specCollapsed = true;
+let statusFilter = false;
 // pokemonLocation: uid → areaKey  (no entry = in wild)
 const pokemonLocation = {};
 // Quick Add
@@ -165,6 +167,12 @@ function toggleFilter(arr, val, el) {
   const i = arr.indexOf(val);
   if(i===-1) arr.push(val); else arr.splice(i,1);
   el.classList.toggle('active', arr.includes(val));
+  renderPokemon();
+}
+
+function toggleStatusFilter(button){
+  statusFilter = !statusFilter;
+  button.classList.toggle('active', statusFilter)
   renderPokemon();
 }
 
@@ -336,6 +344,7 @@ function renderPokemon() {
   let data = ALL_POKEMON.filter(p => {
     if(q && !p.name.toLowerCase().includes(q)) return false;
     if(activeSpecFilters.length && !activeSpecFilters.some(s=>p.specialties.includes(s))) return false;
+    if(statusFilter) return pokemonLocation[p.uid] ? false : true; // if status filter is on, only show pokemon that are unregistered (in wild)
     return true;
   });
   if(activeSort==='id') data.sort((a,b)=>a.pokopiaId-b.pokopiaId||a.name.localeCompare(b.name));
@@ -452,9 +461,10 @@ function renderAreaInsightsPanel(areaKey, pksInArea) {
 function renderAreas() {
   const q = (document.getElementById('area-search')?.value || '').toLowerCase();
   document.getElementById('areas-container').innerHTML = AREAS.map(area => {
-    const pks = ALL_POKEMON.filter(p => pokemonLocation[p.uid] === area.key);
+    const pks = area.key === 'Unregistered' ? ALL_POKEMON.filter(p => pokemonLocation[p.uid] === undefined)
+      : ALL_POKEMON.filter(p => pokemonLocation[p.uid] === area.key);
     const filteredPks = q ? pks.filter(p => p.name.toLowerCase().includes(q)) : pks;
-    const shouldOpen = q ? filteredPks.length > 0 : pks.length > 0;
+    const shouldOpen = q ? filteredPks.length > 0 : false; // auto-open if search matches pokemon in this area
     const bid = 'area-body-' + area.key.replace(/\s/g,'-');
     const cid = 'area-chev-' + area.key.replace(/\s/g,'-');
     const wasOpen = document.getElementById(bid)?.classList.contains('open');
