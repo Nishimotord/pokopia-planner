@@ -210,68 +210,347 @@ body{font-family:"Segoe UI",sans-serif;background:var(--bg);color:var(--text);mi
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:470px;width:100%;max-height:88vh;overflow-y:auto;position:relative}
 
-/* ── MOBILE LAYOUT ── */
+/* ════════════════════════════════════════════
+   MOBILE LAYOUT  ≤ 600px
+   ────────────────────────────────────────────
+   Architecture:
+   • Tab bar:      fixed BOTTOM, full width
+   • Action bar:   fixed BOTTOM above tab bar
+                   4 icon buttons: 🔍 🎚️ ⚡ 🎨
+   • Slide panels: fixed overlays that slide UP
+                   from the action bar edge
+                   - Search panel  (full width input)
+                   - Filter panel  (specialty pills)
+                   - Quick Add panel (area buttons)
+                   - Theme panel   (existing popup)
+   • Content:      padding-bottom so cards clear chrome
+   • Modal:        bottom sheet, full width, slides up
+   ════════════════════════════════════════════ */
 @media(max-width:600px){
-  /* Modal: sit at bottom of screen like a sheet, full width, taller */
+
+  /* ── VARIABLES ── */
+  :root{
+    --card-min:148px;
+    --mob-tab-h:56px;    /* bottom tab bar */
+    --mob-act-h:48px;    /* action bar above tab bar */
+    --mob-chrome:calc(var(--mob-tab-h) + var(--mob-act-h));
+  }
+
+  /* ── HIDE DESKTOP CHROME ── */
+  /* Tab bar becomes bottom nav — restyle it */
+  .top-tabs{
+    position:fixed;
+    top:auto; bottom:0; left:0; right:0;
+    z-index:800;
+    height:var(--mob-tab-h);
+    border-bottom:none;
+    border-top:2px solid var(--border);
+    box-shadow:0 -2px 12px rgba(0,0,0,0.15);
+    overflow-x:auto; overflow-y:visible;
+  }
+  .tab-btn{
+    flex:1;
+    flex-direction:column;
+    justify-content:center;
+    font-size:0.52rem;
+    padding:4px 2px;
+    border-bottom:none;
+    border-top:3px solid transparent;
+    gap:2px;
+    min-width:44px;
+  }
+  .tab-btn.active{
+    border-top-color:var(--accent2);
+    border-bottom:none;
+    color:var(--accent2);
+  }
+  /* hide tab spacer and theme button in tab bar on mobile */
+  .tab-spacer{ display:none; }
+  #theme-picker-btn{ display:none; }
+
+  /* ── HIDE DESKTOP CONTROLS BAR ── */
+  /* Each tab's .controls-bar is hidden on mobile —
+     the mobile action bar + slide panels replace it */
+  .controls-bar{ display:none !important; }
+  /* Also hide desktop spec-filters and quick-add-bar */
+  #spec-filters{ display:none !important; }
+  .quick-add-bar{ display:none !important; }
+
+  /* ── MOBILE ACTION BAR ── */
+  /* Injected by JS as #mob-action-bar, sits above tab bar */
+  #mob-action-bar{
+    position:fixed;
+    bottom:var(--mob-tab-h);
+    left:0; right:0;
+    z-index:790;
+    height:var(--mob-act-h);
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    display:flex;
+    align-items:stretch;
+    box-shadow:0 -1px 6px rgba(0,0,0,0.1);
+  }
+  .mob-act-btn{
+    flex:1;
+    background:none;
+    border:none;
+    border-right:1px solid var(--border);
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    font-size:1.1rem;
+    color:var(--text-dim);
+    transition:background 0.13s, color 0.13s;
+    -webkit-tap-highlight-color:transparent;
+    position:relative;
+  }
+  .mob-act-btn:last-child{ border-right:none; }
+  .mob-act-btn:active{ background:var(--surface2); }
+  .mob-act-btn.active{
+    color:var(--accent2);
+    background:color-mix(in srgb, var(--accent2) 10%, transparent);
+  }
+  .mob-act-btn span{
+    font-size:0.48rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    opacity:0.7;
+  }
+  /* active filter count badge */
+  .mob-act-badge{
+    position:absolute;
+    top:6px; right:calc(50% - 14px);
+    min-width:14px; height:14px;
+    background:var(--accent);
+    color:#fff;
+    border-radius:7px;
+    font-size:0.5rem;
+    font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    padding:0 3px;
+    display:none;
+  }
+  .mob-act-badge.visible{ display:flex; }
+  /* QA active indicator dot */
+  .mob-qa-dot{
+    position:absolute;
+    top:8px; right:calc(50% - 12px);
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--accent2);
+    animation:pulse 1.4s infinite;
+    display:none;
+  }
+  .mob-qa-dot.visible{ display:block; }
+
+  /* ── SLIDE-UP PANELS ── */
+  /* Base style shared by all panels */
+  .mob-panel{
+    position:fixed;
+    bottom:var(--mob-chrome);   /* sits just above action bar */
+    left:0; right:0;
+    z-index:780;
+    background:var(--surface);
+    border-top:2px solid var(--border);
+    box-shadow:0 -4px 20px rgba(0,0,0,0.2);
+    transform:translateY(100%);
+    transition:transform 0.25s cubic-bezier(0.32,0.72,0,1);
+    /* don't set max-height here — each panel sets its own */
+  }
+  .mob-panel.open{
+    transform:translateY(0);
+  }
+
+  /* Search panel */
+  #mob-search-panel{
+    padding:12px 14px 14px;
+  }
+  #mob-search-panel input{
+    width:100%;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:0.9rem;
+    outline:none;
+  }
+  #mob-search-panel input:focus{ border-color:var(--accent2); }
+  .mob-search-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:10px;
+  }
+  .mob-search-label{
+    font-size:0.72rem; font-weight:700; opacity:0.6; white-space:nowrap;
+  }
+  /* Sort pills inside search panel */
+  .mob-sort-row{
+    display:flex; gap:6px; margin-top:10px;
+  }
+  .mob-sort-btn{
+    flex:1;
+    padding:7px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:var(--surface2);
+    color:var(--text-dim);
+    font-size:0.72rem;
+    font-weight:700;
+    cursor:pointer;
+    text-align:center;
+  }
+  .mob-sort-btn.active{
+    background:var(--accent2);
+    color:#000;
+    border-color:var(--accent2);
+  }
+
+  /* Filter panel */
+  #mob-filter-panel{
+    padding:10px 12px 14px;
+    max-height:55vh;
+    overflow-y:auto;
+  }
+  #mob-filter-panel .mob-panel-title{
+    font-size:0.65rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    opacity:0.45;
+    margin-bottom:8px;
+  }
+  #mob-filter-pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  /* filter pills in panel are slightly larger for touch */
+  #mob-filter-pills .filter-pill{
+    padding:6px 11px;
+    font-size:0.68rem;
+  }
+
+  /* Quick Add panel */
+  #mob-qa-panel{
+    padding:10px 12px 14px;
+  }
+  #mob-qa-panel .mob-panel-title{
+    font-size:0.65rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    opacity:0.45;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  #mob-qa-area-btns{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    margin-bottom:10px;
+  }
+  .mob-qa-area-btn{
+    padding:10px 8px;
+    border-radius:10px;
+    border:2px solid var(--border);
+    background:var(--surface2);
+    color:var(--text);
+    font-size:0.72rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.13s;
+    text-align:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mob-qa-area-btn:active{ transform:scale(0.97); }
+  .mob-qa-area-btn.active{
+    background:var(--accent2);
+    color:#000;
+    border-color:var(--accent2);
+  }
+  .mob-qa-area-btn.wild-btn.active{
+    background:var(--green);
+    border-color:var(--green);
+    color:#fff;
+  }
+  /* Wild spans full width */
+  .mob-qa-area-btn.wild-btn{
+    grid-column:1/-1;
+  }
+  /* Return all button */
+  .mob-qa-return-btn{
+    width:100%;
+    padding:9px;
+    border-radius:8px;
+    border:1px solid var(--accent);
+    background:none;
+    color:var(--accent);
+    font-size:0.75rem;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .mob-qa-return-btn:active{ background:var(--accent); color:#fff; }
+
+  /* Dimming backdrop for panels */
+  #mob-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    bottom:var(--mob-chrome);
+    background:rgba(0,0,0,0.4);
+    z-index:770;
+  }
+  #mob-backdrop.open{ display:block; }
+
+  /* ── CONTENT PADDING ── */
+  /* Content must clear bottom chrome */
+  .main-content{
+    padding-bottom:calc(var(--mob-chrome) + 20px);
+  }
+  .areas-container{
+    padding-bottom:calc(var(--mob-chrome) + 20px);
+  }
+
+  /* ── MODAL: BOTTOM SHEET ── */
   .modal-overlay{
     align-items:flex-end;
     padding:0;
+    /* Overlay must sit above panels but below confirm */
+    z-index:850;
   }
   .modal{
     max-width:100%;
     width:100%;
-    max-height:82vh;         /* leave room for phone status bar + tabs */
+    max-height:82vh;
     border-radius:16px 16px 0 0;
     border-bottom:none;
+    /* leave room above bottom chrome if modal is taller than screen */
+    margin-bottom:0;
   }
 
-  /* Controls bar: allow wrap so Quick Add button doesn't get cut off */
-  .controls-bar {
-    flex-wrap: nowrap;        /* never wrap — keeps bar single-row */
-    overflow-x: auto;         /* scroll horizontally instead */
-    overflow-y: visible;      /* must be visible so sticky children below work */
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;    /* hide scrollbar on Firefox */
-  }
-  .controls-bar::-webkit-scrollbar {
-    display: none;            /* hide scrollbar on Chrome/Safari */
+  /* ── TOAST ── */
+  .toast{
+    bottom:calc(var(--mob-chrome) + 12px);
   }
 
-  /* Search input: don't let it flex-grow and push buttons off screen */
-  .controls-bar input[type=text] {
-    flex-shrink: 0;
-    width: 130px;             /* fixed small width, scrollable bar handles overflow */
+  /* ── THEME POPUP on mobile ── */
+  /* Reposition to sit above action bar */
+  .theme-picker-popup{
+    position:fixed !important;
+    bottom:104px !important;   /* 56px tab + 48px action bar = 104px */
+    top:auto !important;
+    right:0 !important;
+    max-width:20% !important;
+    border-radius:14px 14px 0 0 !important;
+    max-height:60vh !important;
+    z-index:795 !important;    /* above action bar (790) but below confirm (900) */
+    box-shadow:0 -4px 20px rgba(0,0,0,0.25) !important;
   }
-
-  /* Remove the order/margin-left:auto trick since we no longer wrap */
-  #qa-toggle-btn {
-    order: 0;
-    margin-left: 0;
-  }
-
-  /* Specialty collapse button: don't shrink weirdly */
-  .spec-collapse-btn{
-    flex-shrink:0;
-  }
-
-  /* Quick add bar: allow buttons to wrap to second line */
-  .quick-add-bar{
-    flex-wrap:wrap;
-    gap:4px;
-    padding:5px 8px;
-  }
-
-  /* Slightly smaller qa buttons on mobile */
-  .qa-area-btn{
-    font-size:0.6rem;
-    padding:3px 8px;
-  }
-
-  /* Card grid: 2 columns on phone */
-  :root{ --card-min:148px; }
-
-  /* Toast: keep above bottom edge */
-  .toast{ bottom:20px; }
 }
 .modal-hdr{background:var(--surface2);padding:14px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:12px}
 .modal-hdr img{width:76px;height:76px;image-rendering:pixelated;flex-shrink:0}
