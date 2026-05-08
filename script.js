@@ -35,7 +35,9 @@ let activeSort = 'id';
 let activeHabSort = 'id';
 let activeSpecFilters = [];
 let specCollapsed = true;
-let statusFilter = false;
+let pokemonStatusFilter = false;
+let habitatStatusFilter = false;
+let currTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'pokemon';
 // pokemonLocation: uid → areaKey  (no entry = in wild)
 const pokemonLocation = {};
 // Quick Add
@@ -145,6 +147,7 @@ function _origSwitchTab(tab) {
     document.querySelector(`[data-tab="${t}"]`)?.classList.toggle('active', t===tab);
   });
   if(tab!=='pokemon') qaActive?toggleQuickAdd():null; // auto-disable quick add when leaving pokemon tab
+  if(tab==='pokemon') renderPokemon();
   if(tab==='habitats') renderHabitats();
   if(tab==='areas') renderAreas();
   window.scrollTo(0, 0);
@@ -171,10 +174,18 @@ function toggleFilter(arr, val, el) {
 }
 
 function toggleStatusFilter(button){
-  statusFilter = !statusFilter;
-  button.classList.toggle('active', statusFilter)
-  renderPokemon();
-  mobUpdateFilterBadge();
+  if (currTab === 'pokemon') {
+    pokemonStatusFilter = !pokemonStatusFilter;
+    button.classList.toggle('active', pokemonStatusFilter)
+  }
+  if (currTab === 'habitats') {
+    habitatStatusFilter = !habitatStatusFilter;
+    button.classList.toggle('active', habitatStatusFilter);
+  } 
+  if (IS_MOBILE()) {
+    mobUpdateFilterBadge();
+  }
+  currTab === 'pokemon' ? renderPokemon() : renderHabitats();
 }
 
 // ── SPECIALTY COLLAPSE ──
@@ -349,7 +360,7 @@ function renderPokemon() {
     // search by specialty
     if(activeSpecFilters.length && !activeSpecFilters.some(s=>p.specialties.includes(s))) return false;
     // filter by stat (in area or wild)
-    if(statusFilter) return pokemonLocation[p.uid] ? false : true;
+    if(pokemonStatusFilter) return pokemonLocation[p.uid] ? false : true;
     return true;
   });
   if(activeSort==='id') data.sort((a,b)=>a.pokopiaId-b.pokopiaId||a.name.localeCompare(b.name));
@@ -397,6 +408,11 @@ function renderHabitats() {
       h.pokemon.some(p => p.name.toLowerCase().includes(q))
     );
   }
+
+  if(habitatStatusFilter) {
+    list = list.filter(h => h.pokemon.some(p => pokemonLocation[p.uid] === undefined));
+  }
+
   if(activeHabSort==='id') list.sort((a,b)=>(a.habitatId||999)-(b.habitatId||999));
   else list.sort((a,b)=>a.name.localeCompare(b.name));
   document.getElementById('habitats-grid').innerHTML = list.map(h => {
@@ -645,9 +661,8 @@ function closeHabModal(e) {
 
 // ── INIT FILTERS ──
 function initFilters() {
-  const allSpecs = [...new Set(ALL_POKEMON.flatMap(p=>p.specialties))].sort();
   const specC = document.getElementById('spec-filters');
-  allSpecs.forEach(s => {
+  ALL_SPECIALTIES.forEach(s => {
     const b = document.createElement('button');
     b.className = 'filter-pill';
     b.innerHTML = `<img src="${specImgUrl(s)}" alt="${s}" style="width:12px;height:12px;vertical-align:middle;margin-right:2px" onerror="this.replaceWith(document.createTextNode('${SPEC_EMOJI[s]||'?'}'))"> ${s}`;
@@ -674,8 +689,9 @@ let mobOpenPanel = null; // 'search' | 'filter' | 'qa' | null
 
 // ── Inject mobile chrome into DOM (runs once on DOMContentLoaded) ──
 function initMobileUI() {
-  if (!IS_MOBILE()) return;
-
+  if (!IS_MOBILE()){
+    return;
+  }
   // ── ACTION BAR ──
   const bar = document.createElement('div');
   bar.id = 'mob-action-bar';
@@ -728,9 +744,9 @@ function initMobileUI() {
   filterPanel.id = 'mob-filter-panel';
   filterPanel.className = 'mob-panel';
   filterPanel.innerHTML = `
-    <div class="mob-panel-title">Specialty Filter</div>
+    <div class="mob-panel-title" id='mob-panel-filter-title'>Specialty Filter</div>
     <div id="mob-filter-pills"></div>
-    <div class="mob-sort-row" id="mob-sort-row">
+    <div class="mob-sort-row" id="mob-filter-row">
       <button class="mob-sort-btn" id="mob-status-filter" onclick="toggleStatusFilter(this)">Hide Registered</button>
     </div>
   `;
@@ -803,9 +819,8 @@ function mobTogglePanel(name) {
   }
 
   // Hide/show Quick Add and Filter based on current tab
-  const tab = document.querySelector('.tab-btn.active')?.dataset.tab || 'pokemon';
-  if (name === 'filter' && tab !== 'pokemon') { showToast('Filters available on the Pokémon tab'); return; }
-  if (name === 'qa'     && tab !== 'pokemon') { showToast('Quick Add available on the Pokémon tab'); return; }
+  if (name === 'filter' && currTab === 'areas') { showToast('Filters available on the Pokémon and Habitat tabs'); return; }
+  if (name === 'qa'     && currTab !== 'pokemon') { showToast('Quick Add available on the Pokémon tab'); return; }
 
   if (mobOpenPanel === name) {
     mobCloseAll();
@@ -820,11 +835,19 @@ function mobTogglePanel(name) {
   // Update search label + sort visibility for current tab
   if (name === 'search') {
     const labels = {pokemon:'Search Pokémon', habitats:'Search Habitats by Name or Pokémon', areas:'Search Areas by Pokémon Name'};
-    document.getElementById('mob-search-label').textContent = labels[tab] || 'Search';
+    document.getElementById('mob-search-label').textContent = labels[currTab] || 'Search';
     // Sort row only relevant for pokemon + habitats
-    document.getElementById('mob-sort-row').style.display = tab === 'areas' ? 'none' : 'flex';
+    document.getElementById('mob-sort-row').style.display = currTab === 'areas' ? 'none' : 'flex';
     mobUpdateSortUI();
     setTimeout(() => document.getElementById('mob-search-input')?.focus(), 200);
+  }
+  // Update Filter label + visibility for current tab
+  if (name === 'filter') {
+    const labels = {pokemon:'Hide Registered Pokemon', habitats:'Show only Habitats with Unregistered Pokemon', areas:''};
+    document.getElementById('mob-status-filter').textContent = labels[currTab] || 'error';
+    // Sort row only relevant for pokemon + habitats
+    document.getElementById('mob-filter-row').style.display = currTab === 'areas' ? 'none' : 'flex';
+    mobUpdateSortUI();
   }
 }
 
@@ -850,15 +873,14 @@ function mobCloseAll() {
 
 // ── Search routing ──
 function mobHandleSearch(val) {
-  const tab = document.querySelector('.tab-btn.active')?.dataset.tab || 'pokemon';
   // Sync value to the relevant hidden desktop input so existing render fns work
-  if (tab === 'pokemon') {
+  if (currTab === 'pokemon') {
     document.getElementById('pk-search').value = val;
     renderPokemon();
-  } else if (tab === 'habitats') {
+  } else if (currTab === 'habitats') {
     document.getElementById('hab-search').value = val;
     renderHabitats();
-  } else if (tab === 'areas') {
+  } else if (currTab === 'areas') {
     document.getElementById('area-search').value = val;
     renderAreas();
   }
@@ -866,8 +888,7 @@ function mobHandleSearch(val) {
 
 // ── Sort routing (mirrors desktop setSort / setHabSort) ──
 function mobSetSort(s) {
-  const tab = document.querySelector('.tab-btn.active')?.dataset.tab || 'pokemon';
-  if (tab === 'habitats') {
+  if (currTab === 'habitats') {
     setHabSort(s);
   } else {
     setSort(s);
@@ -876,19 +897,61 @@ function mobSetSort(s) {
 }
 
 function mobUpdateSortUI() {
-  const tab = document.querySelector('.tab-btn.active')?.dataset.tab || 'pokemon';
-  const active = tab === 'habitats' ? activeHabSort : activeSort;
+  const active = currTab === 'habitats' ? activeHabSort : activeSort;
   document.getElementById('mob-sort-id')  ?.classList.toggle('active', active === 'id');
   document.getElementById('mob-sort-name')?.classList.toggle('active', active === 'name');
+
+  if (currTab !== 'pokemon') {
+    // Hide sort options if not on pokemon tab since they don't apply
+    qaActive = false;
+    qaTarget = null;
+    document.querySelectorAll('.mob-qa-area-btn').forEach(b => b.classList.remove('active'));
+    mobUpdateQADot();
+  }
 }
 
 // ── Filter badge ──
 function mobUpdateFilterBadge() {
   const badge = document.getElementById('mob-filter-badge');
   if (!badge) return;
-  const count = activeSpecFilters.length + (statusFilter ? 1 : 0);
+  const count = (currTab === 'pokemon' ? (activeSpecFilters.length + (pokemonStatusFilter ? 1 : 0)) : 0) + (habitatStatusFilter && currTab === 'habitats' ? 1 : 0);
   badge.textContent = count;
-  badge.classList.toggle('visible', count > 0);
+
+  if (currTab === 'pokemon') {
+    badge.classList.toggle('visible', count > 0 && currTab === 'pokemon');
+  } else if (currTab === 'habitats') {
+    badge.classList.toggle('visible', count > 0 && currTab === 'habitats');
+  }
+  else{
+    badge.classList.toggle('visible', false);
+  }
+  
+}
+// ── Filter Options ──
+function mobUpdateFilterSelection(){
+  /*
+  const filterPanel = document.getElementById('mob-filter-panel');
+  
+  filterPanel.id = 'mob-filter-panel';
+  filterPanel.className = 'mob-panel';
+  filterPanel.innerHTML = `
+    <div class="mob-panel-title">Specialty Filter</div>
+    <div id="mob-filter-pills"></div>
+    <div class="mob-sort-row" id="mob-sort-row">
+      <button class="mob-sort-btn" id="mob-status-filter" onclick="toggleStatusFilter(this)">Hide Registered</button>
+    </div>
+  `;*/
+  const filterPanelTitle = document.getElementById('mob-panel-filter-title');
+  const mobFilterPills = document.getElementById('mob-filter-pills');
+  if (currTab === 'pokemon') {
+    filterPanelTitle.textContent = 'Specialty Filter';
+    document.getElementById('mob-filter-pills').style.display = 'flex';
+    document.getElementById('mob-status-filter').classList.toggle('active', pokemonStatusFilter);
+  } else if (currTab === 'habitats') {
+    filterPanelTitle.textContent = 'Status Filter';
+    document.getElementById('mob-filter-pills').style.display = 'none';
+    document.getElementById('mob-status-filter').classList.toggle('active', habitatStatusFilter);
+   }
 }
 
 // ── QA on mobile: mirrors desktop setQAArea + qaActive state ──
@@ -918,7 +981,6 @@ function mobSetQAArea(key) {
   }
   mobUpdateQADot();
   // Close panel after selection so user can see the cards
-  mobCloseAll();
   showToast(`⚡ Quick Add: ${key === 'wild' ? '🌿 Wild' : key} — tap a card`);
 }
 
@@ -932,6 +994,7 @@ function mobUpdateQADot() {
 // ── Patch switchTab to clear mobile search + close panels ──
 function switchTab(tab) {
   _origSwitchTab(tab);
+  currTab = tab
   if (IS_MOBILE()) {
     // Clear search input when switching tabs
     const inp = document.getElementById('mob-search-input');
@@ -943,7 +1006,7 @@ function switchTab(tab) {
     });
     // Close any open panel
     mobCloseAll();
-    // QA state persists across pokemon tab only — clear when leaving
+    // QA state persists across pokemon tab only — clear when leaving TODO: update QA UI to reflect this better
     if (tab !== 'pokemon' && qaActive) {
       qaActive = false;
       qaTarget = null;
@@ -951,7 +1014,9 @@ function switchTab(tab) {
     }
     // Update sort UI if search panel is opened later
     mobUpdateSortUI();
-  }
+    mobUpdateFilterBadge();
+    mobUpdateFilterSelection();
+    }
 }
 
 
